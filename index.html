@@ -71,8 +71,9 @@
 
   <div class="stats">
     <p>📦 总商品数：<span id="totalCount">加载中...</span></p>
-    <p>🔍 搜索结果：<span id="resultCount">-</span></p>
+    <p>🔍 <span id="resultCount">正在加载...</span></p>
     <p>🖼️ 图片加载测试：<span id="imgStatus">测试中...</span></p>
+    <p style="color: #ff5000; font-size: 12px;">💡 提示：向下滚动自动加载更多商品</p>
   </div>
 
   <div id="products" class="products">
@@ -111,10 +112,14 @@
   <script>
     let allProducts = [];
     let displayedProducts = [];
+    let currentPage = 0;
+    const PAGE_SIZE = 50;
 
     // 加载数据
     async function loadData() {
       try {
+        document.getElementById('products').innerHTML = '<div class="loading">正在加载商品数据...<br><small>首次加载约需 10-30 秒</small></div>';
+        
         const response = await fetch('products_db.json');
         const data = await response.json();
         allProducts = data.products;
@@ -122,16 +127,65 @@
         document.getElementById('totalCount').textContent = allProducts.length;
         
         // 默认显示前50个商品
-        displayProducts(allProducts.slice(0, 50));
+        currentPage = 0;
+        displayProducts(allProducts.slice(0, PAGE_SIZE));
         
         // 测试图片加载
         testImageLoading();
         
-        return true; // 返回成功标志
+        // 添加滚动加载更多
+        setupInfiniteScroll();
+        
+        return true;
       } catch (error) {
         document.getElementById('products').innerHTML = '<div class="no-result">❌ 数据加载失败：' + error.message + '</div>';
         return false;
       }
+    }
+
+    // 无限滚动加载更多
+    function setupInfiniteScroll() {
+      let loading = false;
+      
+      window.addEventListener('scroll', () => {
+        if (loading) return;
+        
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        
+        // 距离底部 200px 时加载更多
+        if (scrollTop + windowHeight >= documentHeight - 200) {
+          loadMore();
+        }
+      });
+    }
+
+    // 加载更多商品
+    function loadMore() {
+      const start = displayedProducts.length;
+      const end = start + PAGE_SIZE;
+      const moreProducts = allProducts.slice(start, end);
+      
+      if (moreProducts.length === 0) return;
+      
+      displayedProducts = displayedProducts.concat(moreProducts);
+      
+      const html = moreProducts.map(p => `
+        <div class="product-card" onclick="showDetail(${p.id})">
+          <img src="${p.img}" alt="${p.name}" onerror="this.src='placeholder.svg'">
+          <div class="info">
+            <div class="name">${p.name}</div>
+            <div>
+              <span class="price">¥${p.price}</span>
+              <span class="unit">/${p.unit}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      
+      document.getElementById('products').insertAdjacentHTML('beforeend', html);
+      document.getElementById('resultCount').textContent = `已显示 ${displayedProducts.length} / ${allProducts.length}`;
     }
 
     // 搜索功能
@@ -139,8 +193,9 @@
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
       
       if (!keyword) {
-        displayProducts(allProducts.slice(0, 50));
-        document.getElementById('resultCount').textContent = '显示前50个';
+        currentPage = 0;
+        displayProducts(allProducts.slice(0, PAGE_SIZE));
+        document.getElementById('resultCount').textContent = `显示前 ${PAGE_SIZE} 个`;
         return;
       }
       
@@ -149,8 +204,8 @@
         (p.num && p.num.toLowerCase().includes(keyword))
       );
       
-      document.getElementById('resultCount').textContent = results.length;
-      displayProducts(results.slice(0, 100)); // 最多显示100个结果
+      document.getElementById('resultCount').textContent = `找到 ${results.length} 个结果`;
+      displayProducts(results.slice(0, 200)); // 搜索结果最多显示200个
     }
 
     // 显示商品
