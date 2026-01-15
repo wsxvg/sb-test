@@ -26,9 +26,11 @@
     .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
     .product-card img { width: 100%; height: 160px; object-fit: cover; background: #f0f0f0; }
     .product-card .info { padding: 10px; }
-    .product-card .name { font-size: 13px; color: #333; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .product-card .name { font-size: 13px; color: #333; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4; }
     .product-card .price { color: #ff5000; font-size: 16px; font-weight: bold; }
     .product-card .unit { color: #999; font-size: 12px; margin-left: 5px; }
+    .product-card .extra-info { margin-top: 8px; font-size: 11px; color: #666; line-height: 1.6; }
+    .product-card .extra-info p { margin: 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     
     .loading { text-align: center; padding: 40px; color: #999; }
     .no-result { text-align: center; padding: 40px; color: #999; }
@@ -100,6 +102,14 @@
         <div class="spec-row">
           <div class="spec-label">商品编号</div>
           <div id="detailNum" class="spec-value"></div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">包装规格</div>
+          <div id="detailSaleInfo" class="spec-value"></div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">起订量</div>
+          <div id="detailMinQty" class="spec-value"></div>
         </div>
         <div class="spec-row">
           <div class="spec-label">商品ID</div>
@@ -180,6 +190,11 @@
               <span class="price">¥${p.price}</span>
               <span class="unit">/${p.unit}</span>
             </div>
+            <div class="extra-info">
+              ${p.num ? `<p>📦 编码：${p.num}</p>` : ''}
+              ${p.sale_info ? `<p>📋 包装：${p.sale_info}</p>` : ''}
+              ${p.min_qty ? `<p>🔢 ${p.min_qty}</p>` : ''}
+            </div>
           </div>
         </div>
       `).join('');
@@ -226,6 +241,11 @@
               <span class="price">¥${p.price}</span>
               <span class="unit">/${p.unit}</span>
             </div>
+            <div class="extra-info">
+              ${p.num ? `<p>📦 编码：${p.num}</p>` : ''}
+              ${p.sale_info ? `<p>📋 包装：${p.sale_info}</p>` : ''}
+              ${p.min_qty ? `<p>🔢 ${p.min_qty}</p>` : ''}
+            </div>
           </div>
         </div>
       `).join('');
@@ -268,6 +288,8 @@
       document.getElementById('detailPrice').textContent = '¥' + product.price;
       document.getElementById('detailUnit').textContent = '/' + product.unit;
       document.getElementById('detailNum').textContent = product.num || '无';
+      document.getElementById('detailSaleInfo').textContent = product.sale_info || '无';
+      document.getElementById('detailMinQty').textContent = product.min_qty || '无';
       document.getElementById('detailId').textContent = product.id;
       
       // 显示详情页
