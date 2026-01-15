@@ -1,0 +1,21 @@
+{
+  "name": "世标五金静态测试版",
+  "short_name": "世标五金",
+  "description": "世标五金商品浏览 - 静态数据测试",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff5000",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
