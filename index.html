@@ -22,7 +22,8 @@
     
     .products { padding: 10px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
     
-    .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .product-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.2s; }
+    .product-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
     .product-card img { width: 100%; height: 160px; object-fit: cover; background: #f0f0f0; }
     .product-card .info { padding: 10px; }
     .product-card .name { font-size: 13px; color: #333; margin-bottom: 5px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -33,6 +34,30 @@
     .no-result { text-align: center; padding: 40px; color: #999; }
     
     .img-error { background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px; }
+    
+    /* 详情页样式 */
+    .detail-page { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 200; overflow-y: auto; }
+    .detail-page.active { display: block; }
+    
+    .detail-header { background: #ff5000; color: white; padding: 15px; display: flex; align-items: center; gap: 15px; position: sticky; top: 0; z-index: 10; }
+    .detail-header .back-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 0; width: 30px; }
+    .detail-header h2 { font-size: 16px; flex: 1; }
+    
+    .detail-content { padding: 15px; }
+    .detail-image { width: 100%; max-width: 500px; margin: 0 auto 20px; display: block; border-radius: 8px; background: #f0f0f0; }
+    
+    .detail-info { background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .detail-info .product-name { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 15px; line-height: 1.5; }
+    .detail-info .price-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 15px; }
+    .detail-info .price-row .price { color: #ff5000; font-size: 28px; font-weight: bold; }
+    .detail-info .price-row .unit { color: #999; font-size: 14px; }
+    
+    .detail-specs { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .detail-specs .spec-title { font-size: 16px; font-weight: bold; margin-bottom: 15px; color: #333; }
+    .detail-specs .spec-row { display: flex; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+    .detail-specs .spec-row:last-child { border-bottom: none; }
+    .detail-specs .spec-label { color: #999; width: 80px; flex-shrink: 0; }
+    .detail-specs .spec-value { color: #333; flex: 1; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -54,6 +79,35 @@
     <div class="loading">正在加载商品数据...</div>
   </div>
 
+  <!-- 商品详情页 -->
+  <div id="detailPage" class="detail-page">
+    <div class="detail-header">
+      <button class="back-btn" onclick="closeDetail()">←</button>
+      <h2>商品详情</h2>
+    </div>
+    <div class="detail-content">
+      <img id="detailImage" class="detail-image" src="" alt="">
+      <div class="detail-info">
+        <div id="detailName" class="product-name"></div>
+        <div class="price-row">
+          <span id="detailPrice" class="price"></span>
+          <span id="detailUnit" class="unit"></span>
+        </div>
+      </div>
+      <div class="detail-specs">
+        <div class="spec-title">商品信息</div>
+        <div class="spec-row">
+          <div class="spec-label">商品编号</div>
+          <div id="detailNum" class="spec-value"></div>
+        </div>
+        <div class="spec-row">
+          <div class="spec-label">商品ID</div>
+          <div id="detailId" class="spec-value"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let allProducts = [];
     let displayedProducts = [];
@@ -72,8 +126,11 @@
         
         // 测试图片加载
         testImageLoading();
+        
+        return true; // 返回成功标志
       } catch (error) {
         document.getElementById('products').innerHTML = '<div class="no-result">❌ 数据加载失败：' + error.message + '</div>';
+        return false;
       }
     }
 
@@ -106,7 +163,7 @@
       }
       
       const html = products.map(p => `
-        <div class="product-card">
+        <div class="product-card" onclick="showDetail(${p.id})">
           <img src="${p.img}" alt="${p.name}" onerror="this.src='placeholder.svg'">
           <div class="info">
             <div class="name">${p.name}</div>
@@ -141,13 +198,62 @@
       testImg.src = testUrl;
     }
 
+    // 显示商品详情
+    function showDetail(productId) {
+      const product = allProducts.find(p => p.id === productId);
+      if (!product) return;
+      
+      // 更新 URL（支持分享和刷新）
+      history.pushState({ productId }, '', `?id=${productId}`);
+      
+      // 填充详情数据
+      document.getElementById('detailImage').src = product.img.replace('/w250', ''); // 使用大图
+      document.getElementById('detailImage').onerror = function() { this.src = 'placeholder.svg'; };
+      document.getElementById('detailName').textContent = product.name;
+      document.getElementById('detailPrice').textContent = '¥' + product.price;
+      document.getElementById('detailUnit').textContent = '/' + product.unit;
+      document.getElementById('detailNum').textContent = product.num || '无';
+      document.getElementById('detailId').textContent = product.id;
+      
+      // 显示详情页
+      document.getElementById('detailPage').classList.add('active');
+      document.body.style.overflow = 'hidden'; // 禁止背景滚动
+    }
+
+    // 关闭详情页
+    function closeDetail() {
+      document.getElementById('detailPage').classList.remove('active');
+      document.body.style.overflow = ''; // 恢复滚动
+      history.pushState({}, '', location.pathname); // 清除 URL 参数
+    }
+
+    // 处理浏览器后退按钮
+    window.addEventListener('popstate', (event) => {
+      if (event.state && event.state.productId) {
+        showDetail(event.state.productId);
+      } else {
+        closeDetail();
+      }
+    });
+
+    // 页面加载时检查 URL 参数
+    function checkUrlParams() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      if (productId) {
+        showDetail(parseInt(productId));
+      }
+    }
+
     // 回车搜索
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('searchInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') search();
       });
       
-      loadData();
+      loadData().then(() => {
+        checkUrlParams(); // 数据加载完成后检查 URL
+      });
     });
 
     // 注册 Service Worker
