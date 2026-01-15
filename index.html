@@ -107,7 +107,7 @@
       
       const html = products.map(p => `
         <div class="product-card">
-          <img src="${p.img}" alt="${p.name}" onerror="this.parentElement.classList.add('img-error'); this.style.display='none'; this.parentElement.innerHTML='<div class=img-error style=height:160px>图片加载失败</div>' + this.parentElement.innerHTML;">
+          <img src="${p.img}" alt="${p.name}" onerror="this.src='placeholder.svg'">
           <div class="info">
             <div class="name">${p.name}</div>
             <div>
