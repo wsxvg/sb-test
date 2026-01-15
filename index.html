@@ -232,7 +232,9 @@
         return;
       }
       
-      const html = products.map(p => `
+      const html = products.map(p => {
+        console.log('商品数据:', p.name, 'num:', p.num, 'sale_info:', p.sale_info, 'min_qty:', p.min_qty);
+        return `
         <div class="product-card" onclick="showDetail(${p.id})">
           <img src="${p.img}" alt="${p.name}" onerror="this.src='placeholder.svg'">
           <div class="info">
@@ -248,7 +250,8 @@
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
       
       document.getElementById('products').innerHTML = html;
     }
