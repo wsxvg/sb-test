@@ -265,7 +265,34 @@
         }
 
         function showCategoryList(gid, limit=false) {
-            const list = db.products.filter(p => p.gid == gid);
+            console.log('查找分类ID:', gid);
+            // 先尝试按 gid 匹配（一级分类）
+            let list = db.products.filter(p => p.gid == gid);
+            
+            // 如果没找到，可能是三级分类，需要遍历查找
+            if (list.length === 0) {
+                // 遍历所有商品，检查是否属于这个三级分类
+                db.category_tree.forEach(level1 => {
+                    if (level1.subs) {
+                        level1.subs.forEach(level2 => {
+                            if (level2.children) {
+                                level2.children.forEach(level3 => {
+                                    if (level3.id == gid) {
+                                        // 找到了这个三级分类，获取它下面的商品
+                                        // 商品的 gid 应该匹配这个三级分类的 id
+                                        list = db.products.filter(p => p.gid == gid);
+                                    }
+                                });
+                            } else if (level2.id == gid) {
+                                // 二级分类
+                                list = db.products.filter(p => p.gid == gid);
+                            }
+                        });
+                    }
+                });
+            }
+            
+            console.log('找到商品数量:', list.length);
             const target = limit ? list.slice(0, 10) : list;
             const html = target.map(p => `
                 <div class="prod-list-item" onclick="openDetail(${p.id})">
@@ -283,7 +310,9 @@
                 </div>
             `).join('');
             const container = document.getElementById('subProdList');
-            if(container) container.innerHTML = html;
+            if(container) {
+                container.innerHTML = html || '<div style="padding:20px; text-align:center; color:#999;">暂无商品</div>';
+            }
         }
 
         // --- 找回的功能：详情页 ---
