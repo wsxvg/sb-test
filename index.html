@@ -2,14 +2,13 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <base href="/sb-test/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="汇友机电">
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/sb-test/manifest.json">
     <title>汇友机电商城</title>
     <style>
         :root { --primary: #3296F0; --orange: #FF7033; --bg: #F7F7F7; --border: #eeeeee; }
@@ -216,16 +215,16 @@
     <!-- 底部 TabBar -->
     <div class="tabbar">
         <div class="tab-btn active" onclick="switchTab('home', this)">
-            <img src="images/home_un.png"><span>首页</span>
+            <img src="/sb-test/images/home_un.png"><span>首页</span>
         </div>
         <div class="tab-btn" onclick="switchTab('category', this)">
-            <img src="images/category_un.png"><span>分类</span>
+            <img src="/sb-test/images/category_un.png"><span>分类</span>
         </div>
         <div class="tab-btn" onclick="switchTab('cart', this)">
-            <img src="images/cart_un.png"><span>购物车</span>
+            <img src="/sb-test/images/cart_un.png"><span>购物车</span>
         </div>
         <div class="tab-btn" onclick="switchTab('me', this)">
-            <img src="images/user_un.png"><span>我</span>
+            <img src="/sb-test/images/user_un.png"><span>我</span>
         </div>
     </div>
 
@@ -279,7 +278,7 @@
                                     img.removeAttribute('data-src');
                                 };
                                 img.onerror = () => {
-                                    img.src = 'placeholder.svg';
+                                    img.src = '/sb-test/placeholder.svg';
                                     img.classList.remove('lazy-loading');
                                 };
                             }
@@ -304,11 +303,11 @@
             try {
                 console.log('开始加载数据...');
                 const [p, h] = await Promise.all([
-                    fetch('products_db.json').then(r => {
+                    fetch('/sb-test/products_db.json').then(r => {
                         if (!r.ok) throw new Error('无法加载商品数据');
                         return r.json();
                     }),
-                    fetch('home_config.json').then(r => {
+                    fetch('/sb-test/home_config.json').then(r => {
                         if (!r.ok) throw new Error('无法加载首页配置');
                         return r.json();
                     })
@@ -353,7 +352,7 @@
                 
                 homeData.forEach(row => {
                     if(row.type === 1 && row.data && row.data.length > 0) {
-                        html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
+                        html += `<div class="home-row row-banner"><img src="/sb-test/${row.data[0].local}"></div>`;
                         // 第一张图片后面添加公告
                         if(firstBanner) {
                             html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到汇友机电有限公司</marquee></div>`;
@@ -369,7 +368,7 @@
                 html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid" id="homeProductGrid">`;
                 db.products.slice(0, 10).forEach(item => {
                     html += `<div class="prod-card" data-id="${item.id}">
-                        <img data-src="${fixUrl(item.img)}" src="placeholder.svg" alt="${item.name}">
+                        <img data-src="${fixUrl(item.img)}" src="/sb-test/placeholder.svg" alt="${item.name}">
                         <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
                         <div class="prod-price">${formatPrice(item.price, item.unit)}</div>
                     </div>`;
@@ -432,7 +431,7 @@
                             // 使用 data 属性存储分类信息，移除 onclick
                             html += `
                                 <div class="sub-box" data-gid="${child.id}" data-name="${child.name}">
-                                    <img data-src="${fixUrl(child.img)}" src="placeholder.svg" alt="${child.name}">
+                                    <img data-src="${fixUrl(child.img)}" src="/sb-test/placeholder.svg" alt="${child.name}">
                                     <p>${child.name}</p>
                                 </div>`;
                         });
@@ -440,7 +439,7 @@
                         // 如果没有三级分类，则把二级分类自己显示为一个图标
                         html += `
                             <div class="sub-box" data-gid="${sub.id}" data-name="${sub.name}">
-                                <img data-src="${fixUrl(sub.img)}" src="placeholder.svg" alt="${sub.name}">
+                                <img data-src="${fixUrl(sub.img)}" src="/sb-test/placeholder.svg" alt="${sub.name}">
                                 <p>${sub.name}</p>
                             </div>`;
                     }
@@ -504,7 +503,7 @@
             products.forEach(p => {
                 tempDiv.innerHTML = `
                     <div class="prod-list-item" data-id="${p.id}">
-                        <img data-src="${fixUrl(p.img)}" src="placeholder.svg" class="prod-list-img" alt="${p.name}">
+                        <img data-src="${fixUrl(p.img)}" src="/sb-test/placeholder.svg" class="prod-list-img" alt="${p.name}">
                         <div class="prod-list-info">
                             <div class="prod-list-name">${p.name}</div>
                             <div class="prod-list-detail">
@@ -667,12 +666,12 @@
                 topNav.className = 'top-nav show category-mode';
                 topNav.innerHTML = `
                     <div class="logo-circle">
-                        <img src="images/circle-class-down.png" alt="分类">
+                        <img src="/sb-test/images/circle-class-down.png" alt="分类">
                     </div>
                     <div class="search-wrap">
                         <input type="text" id="searchInput" placeholder="搜索产品" onkeypress="handleSearch(event)">
                     </div>
-                    <img src="images/home-scan.png" class="scan-btn" alt="扫码">
+                    <img src="/sb-test/images/home-scan.png" class="scan-btn" alt="扫码">
                 `;
             } else {
                 topNav.style.display = 'flex';
@@ -680,7 +679,7 @@
         }
 
         function fixUrl(u) {
-            if (!u || u === "") return 'placeholder.svg';
+            if (!u || u === "") return '/sb-test/placeholder.svg';
             
             // 如果已经是完整的 http 或 https 开头了，直接用，不要再加前缀！
             if (u.toLowerCase().startsWith('http')) {
