@@ -170,10 +170,10 @@
             </div>
         </div>
         <div class="product-list-sort">
-            <div class="sort-item active" onclick="sortProducts('default')">综合</div>
-            <div class="sort-item" onclick="if(currentSortType==='price_asc'){sortProducts('price_desc')}else{sortProducts('price_asc')}">价格 ▲</div>
-            <div class="sort-item" onclick="sortProducts('hot')">热度</div>
-            <div class="sort-item" onclick="sortProducts('brand')">品牌</div>
+            <div class="sort-item active" data-sort="default" onclick="sortProducts('default')">综合</div>
+            <div class="sort-item" data-sort="price" onclick="togglePriceSort()">价格 ▲</div>
+            <div class="sort-item" data-sort="hot" onclick="sortProducts('hot')">热度</div>
+            <div class="sort-item" data-sort="brand" onclick="sortProducts('brand')">品牌</div>
         </div>
         <div class="product-list-content" id="productListContent"></div>
     </div>
@@ -363,19 +363,27 @@
             renderProductList(products);
         }
         
+        function togglePriceSort() {
+            if (currentSortType === 'price_asc') {
+                sortProducts('price_desc');
+            } else {
+                sortProducts('price_asc');
+            }
+        }
+        
         function updateSortButtons() {
             document.querySelectorAll('.sort-item').forEach(item => item.classList.remove('active'));
             
             if (currentSortType === 'default') {
-                document.querySelector('.sort-item:nth-child(1)').classList.add('active');
+                document.querySelector('.sort-item[data-sort="default"]').classList.add('active');
             } else if (currentSortType === 'price_asc' || currentSortType === 'price_desc') {
-                const priceBtn = document.querySelector('.sort-item:nth-child(2)');
+                const priceBtn = document.querySelector('.sort-item[data-sort="price"]');
                 priceBtn.classList.add('active');
                 priceBtn.textContent = currentSortType === 'price_asc' ? '价格 ▲' : '价格 ▼';
             } else if (currentSortType === 'hot') {
-                document.querySelector('.sort-item:nth-child(3)').classList.add('active');
+                document.querySelector('.sort-item[data-sort="hot"]').classList.add('active');
             } else if (currentSortType === 'brand') {
-                document.querySelector('.sort-item:nth-child(4)').classList.add('active');
+                document.querySelector('.sort-item[data-sort="brand"]').classList.add('active');
             }
         }
         
