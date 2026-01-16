@@ -91,4 +91,5 @@ jobs:
           fi
           git add products_db.json
           git commit -m "$COMMIT_MSG"
+          git pull --rebase origin main
           git push origin main
