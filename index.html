@@ -70,6 +70,15 @@
         .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .prod-price { color: #ff5000; font-weight: bold; font-size: 16px; margin-top: 5px; }
 
+        /* 商品列表样式（图片中的样式） */
+        .prod-list-item { display: flex; align-items: center; padding: 15px; background: white; border-bottom: 1px solid #f0f0f0; gap: 12px; }
+        .prod-list-img { width: 80px; height: 80px; object-fit: contain; flex-shrink: 0; background: #f9f9f9; border-radius: 4px; }
+        .prod-list-info { flex: 1; }
+        .prod-list-name { font-size: 14px; font-weight: 500; color: #333; margin-bottom: 8px; line-height: 1.4; }
+        .prod-list-detail { font-size: 11px; color: #999; line-height: 1.6; }
+        .prod-list-price { color: #ff5000; font-size: 16px; font-weight: bold; margin-top: 5px; }
+        .prod-list-add { width: 36px; height: 36px; background: #ff5000; border-radius: 50%; color: white; font-size: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
         .empty-cart { text-align: center; padding-top: 100px; color: #999; }
     </style>
 </head>
@@ -247,7 +256,7 @@
             }
             
             // 4. 下方预留一个区域显示点击后的商品列表
-            html += `<div id="subProdList" class="prod-grid" style="margin-top:20px;"></div>`;
+            html += `<div id="subProdList" style="margin-top:20px;"></div>`;
             
             container.innerHTML = html;
             
@@ -259,10 +268,18 @@
             const list = db.products.filter(p => p.gid == gid);
             const target = limit ? list.slice(0, 10) : list;
             const html = target.map(p => `
-                <div class="prod-card" onclick="openDetail(${p.id})">
-                    <img src="${fixUrl(p.img)}">
-                    <div style="font-size:11px; margin:5px 0;">${p.name}</div>
-                    <div style="color:#ff5000; font-weight:bold;">¥${p.price}</div>
+                <div class="prod-list-item" onclick="openDetail(${p.id})">
+                    <img src="${fixUrl(p.img)}" class="prod-list-img">
+                    <div class="prod-list-info">
+                        <div class="prod-list-name">${p.name}</div>
+                        <div class="prod-list-detail">
+                            <div>编码：${p.num || '无'}</div>
+                            <div>包装：${p.sale_info || '无'}</div>
+                            <div>${p.min_qty || ''}</div>
+                        </div>
+                        <div class="prod-list-price">¥${p.price}</div>
+                    </div>
+                    <div class="prod-list-add">+</div>
                 </div>
             `).join('');
             const container = document.getElementById('subProdList');
@@ -314,7 +331,7 @@
                         <img src="images/circle-class-down.png" alt="分类">
                     </div>
                     <div class="search-wrap">
-                        <input type="text" id="searchInput" placeholder="搜索商品编码或名称" onkeypress="handleSearch(event)">
+                        <input type="text" id="searchInput" placeholder="搜索产品" onkeypress="handleSearch(event)">
                     </div>
                     <img src="images/home-scan.png" class="scan-btn" alt="扫码">
                 `;
