@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="referrer" content="no-referrer">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="汇友机电">
-    <link rel="manifest" href="/sb-test/manifest.json">
-    <title>汇友机电商城</title>
+    <meta name="apple-mobile-web-app-title" content="世标五金">
+    <link rel="manifest" href="manifest.json">
+    <title>世标五金商城</title>
     <style>
         :root { --primary: #3296F0; --orange: #FF7033; --bg: #F7F7F7; --border: #eeeeee; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -35,13 +34,11 @@
         .top-nav.category-mode .scan-btn { width: 24px; height: 24px; opacity: 0.7; flex-shrink: 0; }
 
         /* --- 页面切换 --- */
-        .page { display: none !important; padding-top: 50px; padding-bottom: 60px; min-height: 100vh; position: relative; z-index: 1; }
-        .page.active { display: block !important; }
-        .page#homePage { padding-top: 0; }
-        .page#categoryPage { padding-top: 0; }
+        .page { display: none; padding-top: 50px; padding-bottom: 60px; min-height: 100vh; }
+        .page.active { display: block; }
 
         /* --- 分类页 (深度复刻图一) --- */
-        .cat-container { display: flex; height: calc(100vh - 110px); background: white; margin-top: 50px; }
+        .cat-container { display: flex; height: calc(100vh - 110px); background: white; }
         .cat-left { width: 95px; background: #F7F7F7; overflow-y: auto; }
         .cat-item { padding: 18px 10px; font-size: 13px; text-align: center; color: #666; border-left: 3px solid transparent; line-height: 1.2; }
         .cat-item.active { background: white; color: var(--primary); border-left-color: var(--primary); font-weight: bold; }
@@ -65,20 +62,16 @@
         .tab-btn img { width: 24px; height: 24px; margin-bottom: 2px; }
         .tab-btn.active { color: var(--primary); }
 
-        /* 调试：确保内容可见 */
-        #homePage { background: white !important; min-height: 100vh !important; }
-        #homeContent { min-height: 100vh !important; display: block !important; width: 100% !important; }
-
         /* --- 首页组件 --- */
-        .home-row { background: white; margin-bottom: 8px; width: 100%; display: block; }
+        .home-row { background: white; margin-bottom: 8px; width: 100%; }
         .row-banner img { width: 100%; display: block; }
         .row-notice { padding: 10px 15px; display: flex; align-items: center; font-size: 13px; }
         .notice-tag { color: #E64340; font-weight: bold; padding-right: 10px; border-right: 1px solid #eee; margin-right: 10px; }
 
         /* 通用商品卡片 */
-        .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; background: var(--bg); }
-        .prod-card { background: white; padding: 10px; border-radius: 8px; display: block; }
-        .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }
+        .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+        .prod-card { background: white; padding: 10px; border-radius: 8px; }
+        .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .prod-price { color: #ff5000; font-weight: bold; font-size: 16px; margin-top: 5px; }
 
         /* 图片懒加载占位 */
@@ -127,7 +120,15 @@
 <body>
 
     <!-- 顶部导航 -->
-    <div class="top-nav" id="topNav" style="display: none;">
+    <div class="top-nav show home-mode" id="topNav">
+        <!-- 首页模式内容 -->
+        <img src="images/logo.png" class="logo" alt="Logo">
+        <div class="right-icons">
+            <img src="images/home-notice-null.png" alt="通知">
+            <img src="images/home-scan.png" alt="扫一扫">
+            <img src="images/home-search.png" alt="搜索">
+        </div>
+    </div>
 
     <!-- 1. 首页 -->
     <div id="homePage" class="page active">
@@ -215,16 +216,16 @@
     <!-- 底部 TabBar -->
     <div class="tabbar">
         <div class="tab-btn active" onclick="switchTab('home', this)">
-            <img src="/sb-test/images/home_un.png"><span>首页</span>
+            <img src="images/home_un.png"><span>首页</span>
         </div>
         <div class="tab-btn" onclick="switchTab('category', this)">
-            <img src="/sb-test/images/category_un.png"><span>分类</span>
+            <img src="images/category_un.png"><span>分类</span>
         </div>
         <div class="tab-btn" onclick="switchTab('cart', this)">
-            <img src="/sb-test/images/cart_un.png"><span>购物车</span>
+            <img src="images/cart_un.png"><span>购物车</span>
         </div>
         <div class="tab-btn" onclick="switchTab('me', this)">
-            <img src="/sb-test/images/user_un.png"><span>我</span>
+            <img src="images/user_un.png"><span>我</span>
         </div>
     </div>
 
@@ -278,7 +279,7 @@
                                     img.removeAttribute('data-src');
                                 };
                                 img.onerror = () => {
-                                    img.src = '/sb-test/placeholder.svg';
+                                    img.src = 'placeholder.svg';
                                     img.classList.remove('lazy-loading');
                                 };
                             }
@@ -300,102 +301,53 @@
         // ===== 初始化 =====
 
         async function init() {
-            try {
-                console.log('开始加载数据...');
-                const [p, h] = await Promise.all([
-                    fetch('/sb-test/products_db.json').then(r => {
-                        if (!r.ok) throw new Error('无法加载商品数据');
-                        return r.json();
-                    }),
-                    fetch('/sb-test/home_config.json').then(r => {
-                        if (!r.ok) throw new Error('无法加载首页配置');
-                        return r.json();
-                    })
-                ]);
-                
-                db = p; 
-                homeData = h;
-                console.log('数据加载成功，商品数量:', db.products.length);
-                
-                // 初始化懒加载
-                initLazyLoad();
-                
-                renderHome();
-                renderCatMenu();
-                
-                // 初始化事件委托
-                initEventDelegation();
-                
-                console.log('初始化完成');
-            } catch (error) {
-                console.error('初始化失败:', error);
-                document.getElementById('homeContent').innerHTML = `
-                    <div style="padding: 40px 20px; text-align: center; color: #999;">
-                        <p style="font-size: 16px; margin-bottom: 10px;">😔 加载失败</p>
-                        <p style="font-size: 14px;">${error.message}</p>
-                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: var(--primary); color: white; border: none; border-radius: 4px; font-size: 14px;">重新加载</button>
-                    </div>
-                `;
-            }
+            const [p, h] = await Promise.all([
+                fetch('products_db.json').then(r => r.json()),
+                fetch('home_config.json').then(r => r.json())
+            ]);
+            db = p; homeData = h;
+            
+            // 初始化懒加载
+            initLazyLoad();
+            
+            renderHome();
+            renderCatMenu();
+            
+            // 初始化事件委托
+            initEventDelegation();
         }
 
         // --- 首页渲染 ---
         function renderHome() {
-            try {
-                console.log('开始渲染首页...');
-                let html = '';
-                let firstBanner = true;
-                
-                if (!homeData || !Array.isArray(homeData)) {
-                    throw new Error('首页配置数据格式错误');
-                }
-                
-                homeData.forEach(row => {
-                    if(row.type === 1 && row.data && row.data.length > 0) {
-                        html += `<div class="home-row row-banner"><img src="/sb-test/${row.data[0].local}"></div>`;
-                        // 第一张图片后面添加公告
-                        if(firstBanner) {
-                            html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到汇友机电有限公司</marquee></div>`;
-                            firstBanner = false;
-                        }
+            let html = '';
+            let firstBanner = true;
+            
+            homeData.forEach(row => {
+                if(row.type === 1) {
+                    html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
+                    // 第一张图片后面添加公告
+                    if(firstBanner) {
+                        html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到世标工品汇</marquee></div>`;
+                        firstBanner = false;
                     }
-                });
-                
-                if (!db || !db.products || !Array.isArray(db.products)) {
-                    throw new Error('商品数据格式错误');
                 }
-                
-                html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid" id="homeProductGrid">`;
-                db.products.slice(0, 10).forEach(item => {
-                    html += `<div class="prod-card" data-id="${item.id}">
-                        <img data-src="${fixUrl(item.img)}" src="/sb-test/placeholder.svg" alt="${item.name}">
-                        <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
-                        <div class="prod-price">${formatPrice(item.price, item.unit)}</div>
-                    </div>`;
-                });
-                html += `</div>`;
-                
-                const homeContent = document.getElementById('homeContent');
-                if (!homeContent) {
-                    throw new Error('找不到首页容器元素');
-                }
-                homeContent.innerHTML = html;
-                
-                // 启动懒加载
-                observeLazyImages(homeContent);
-                console.log('首页渲染完成');
-            } catch (error) {
-                console.error('首页渲染失败:', error);
-                const homeContent = document.getElementById('homeContent');
-                if (homeContent) {
-                    homeContent.innerHTML = `
-                        <div style="padding: 40px 20px; text-align: center; color: #999;">
-                            <p style="font-size: 16px; margin-bottom: 10px;">😔 页面加载失败</p>
-                            <p style="font-size: 14px;">${error.message}</p>
-                        </div>
-                    `;
-                }
-            }
+            });
+            
+            html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid" id="homeProductGrid">`;
+            db.products.slice(0, 10).forEach(item => {
+                html += `<div class="prod-card" data-id="${item.id}">
+                    <img data-src="${fixUrl(item.img)}" src="placeholder.svg" alt="${item.name}">
+                    <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
+                    <div class="prod-price">${formatPrice(item.price, item.unit)}</div>
+                </div>`;
+            });
+            html += `</div>`;
+            
+            const homeContent = document.getElementById('homeContent');
+            homeContent.innerHTML = html;
+            
+            // 启动懒加载
+            observeLazyImages(homeContent);
         }
 
         // --- 分类渲染 (图一逻辑) ---
@@ -431,7 +383,7 @@
                             // 使用 data 属性存储分类信息，移除 onclick
                             html += `
                                 <div class="sub-box" data-gid="${child.id}" data-name="${child.name}">
-                                    <img data-src="${fixUrl(child.img)}" src="/sb-test/placeholder.svg" alt="${child.name}">
+                                    <img data-src="${fixUrl(child.img)}" src="placeholder.svg" alt="${child.name}">
                                     <p>${child.name}</p>
                                 </div>`;
                         });
@@ -439,7 +391,7 @@
                         // 如果没有三级分类，则把二级分类自己显示为一个图标
                         html += `
                             <div class="sub-box" data-gid="${sub.id}" data-name="${sub.name}">
-                                <img data-src="${fixUrl(sub.img)}" src="/sb-test/placeholder.svg" alt="${sub.name}">
+                                <img data-src="${fixUrl(sub.img)}" src="placeholder.svg" alt="${sub.name}">
                                 <p>${sub.name}</p>
                             </div>`;
                     }
@@ -503,7 +455,7 @@
             products.forEach(p => {
                 tempDiv.innerHTML = `
                     <div class="prod-list-item" data-id="${p.id}">
-                        <img data-src="${fixUrl(p.img)}" src="/sb-test/placeholder.svg" class="prod-list-img" alt="${p.name}">
+                        <img data-src="${fixUrl(p.img)}" src="placeholder.svg" class="prod-list-img" alt="${p.name}">
                         <div class="prod-list-info">
                             <div class="prod-list-name">${p.name}</div>
                             <div class="prod-list-detail">
@@ -658,20 +610,32 @@
             el.classList.add('active');
             
             const topNav = document.getElementById('topNav');
-            if (type === 'me' || type === 'home') {
+            if (type === 'me') {
                 topNav.style.display = 'none';
+            } else if (type === 'home') {
+                // 首页模式
+                topNav.style.display = 'flex';
+                topNav.className = 'top-nav show home-mode';
+                topNav.innerHTML = `
+                    <img src="images/logo.png" class="logo" alt="Logo">
+                    <div class="right-icons">
+                        <img src="images/home-notice-null.png" alt="通知">
+                        <img src="images/home-scan.png" alt="扫一扫">
+                        <img src="images/home-search.png" alt="搜索">
+                    </div>
+                `;
             } else if (type === 'category') {
                 // 分类页模式
                 topNav.style.display = 'flex';
                 topNav.className = 'top-nav show category-mode';
                 topNav.innerHTML = `
                     <div class="logo-circle">
-                        <img src="/sb-test/images/circle-class-down.png" alt="分类">
+                        <img src="images/circle-class-down.png" alt="分类">
                     </div>
                     <div class="search-wrap">
                         <input type="text" id="searchInput" placeholder="搜索产品" onkeypress="handleSearch(event)">
                     </div>
-                    <img src="/sb-test/images/home-scan.png" class="scan-btn" alt="扫码">
+                    <img src="images/home-scan.png" class="scan-btn" alt="扫码">
                 `;
             } else {
                 topNav.style.display = 'flex';
@@ -679,7 +643,7 @@
         }
 
         function fixUrl(u) {
-            if (!u || u === "") return '/sb-test/placeholder.svg';
+            if (!u || u === "") return 'placeholder.svg';
             
             // 如果已经是完整的 http 或 https 开头了，直接用，不要再加前缀！
             if (u.toLowerCase().startsWith('http')) {
