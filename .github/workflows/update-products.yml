@@ -1,11 +1,8 @@
 name: 更新商品数据
 
 on:
-  # 定时任务：每天北京时间凌晨 5:00（UTC 21:00）
   schedule:
     - cron: '0 21 * * *'
-  
-  # 允许手动触发
   workflow_dispatch:
 
 jobs:
@@ -13,25 +10,21 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # 1. 检出代码
       - name: 检出代码
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      # 2. 设置 Python 环境
       - name: 设置 Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       
-      # 3. 安装依赖
       - name: 安装 Python 依赖
         run: |
           python -m pip install --upgrade pip
           pip install requests urllib3
       
-      # 4. 运行爬虫脚本
       - name: 运行商品数据爬取
         env:
           YDHID: ${{ secrets.YDHID }}
@@ -43,7 +36,6 @@ jobs:
           python demo.py
         continue-on-error: false
       
-      # 5. 检查数据有效性
       - name: 验证数据文件
         run: |
           cd static-shop-test
@@ -51,86 +43,54 @@ jobs:
             echo "错误：products_db.json 文件未生成"
             exit 1
           fi
-          
           FILE_SIZE=$(stat -c%s "products_db.json")
           if [ "$FILE_SIZE" -lt 102400 ]; then
-            echo "错误：products_db.json 文件太小 ($FILE_SIZE bytes)"
+            echo "错误：products_db.json 文件太小"
             exit 1
           fi
-          
           python -c "import json; json.load(open('products_db.json'))"
-          
           PRODUCT_COUNT=$(python -c "import json; data=json.load(open('products_db.json')); print(len(data.get('products', [])))")
           echo "商品数量: $PRODUCT_COUNT"
-          
           if [ "$PRODUCT_COUNT" -lt 10000 ]; then
-            echo "警告：商品数量少于预期 ($PRODUCT_COUNT < 10000)"
+            echo "警告：商品数量少于预期"
             exit 1
           fi
-          
-          echo "✅ 数据验证通过"
+          echo "数据验证通过"
       
-      # 6. 检查是否有变化
       - name: 检查数据变化
         id: check_changes
         run: |
           cd static-shop-test
           if git diff --quiet products_db.json; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
-            echo "ℹ️ 数据无变化，跳过提交"
+            echo "数据无变化，跳过提交"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            
             OLD_COUNT=$(git show HEAD:static-shop-test/products_db.json | python -c "import json,sys; data=json.load(sys.stdin); print(len(data.get('products', [])))" 2>/dev/null || echo "0")
             NEW_COUNT=$(python -c "import json; data=json.load(open('products_db.json')); print(len(data.get('products', [])))")
             DIFF=$((NEW_COUNT - OLD_COUNT))
-            
             echo "old_count=$OLD_COUNT" >> $GITHUB_OUTPUT
             echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
             echo "diff=$DIFF" >> $GITHUB_OUTPUT
-            
-            echo "📊 商品数量变化: $OLD_COUNT → $NEW_COUNT"
+            echo "商品数量变化: $OLD_COUNT -> $NEW_COUNT"
           fi
       
-      # 7. 提交并推送更改
       - name: 提交并推送更改
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           cd static-shop-test
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          
           BEIJING_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
-          
           OLD_COUNT="${{ steps.check_changes.outputs.old_count }}"
           NEW_COUNT="${{ steps.check_changes.outputs.new_count }}"
           DIFF="${{ steps.check_changes.outputs.diff }}"
-          
-          COMMIT_MSG="🤖 自动更新商品数据 - $BEIJING_TIME
-
-商品数量: $OLD_COUNT → $NEW_COUNT"
-          
+          COMMIT_MSG="自动更新商品数据 - $BEIJING_TIME 商品数量: $OLD_COUNT -> $NEW_COUNT"
           if [ "$DIFF" -gt 0 ]; then
             COMMIT_MSG="$COMMIT_MSG (+$DIFF)"
           elif [ "$DIFF" -lt 0 ]; then
             COMMIT_MSG="$COMMIT_MSG ($DIFF)"
           fi
-          
           git add products_db.json
           git commit -m "$COMMIT_MSG"
           git push
-      
-      # 8. 创建失败报告
-      - name: 创建失败报告
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '⚠️ 商品数据更新失败',
-              body: '## 自动更新失败\n\n请检查工作流日志查看详细错误信息。',
-              labels: ['自动化', 'bug']
-            })
-
