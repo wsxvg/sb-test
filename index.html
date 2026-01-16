@@ -206,22 +206,53 @@
         }
 
         function selectCat(idx) {
+            // 1. 高亮左侧选中的一级分类
             document.querySelectorAll('.cat-item').forEach((el, i) => el.classList.toggle('active', i === idx));
-            const cat = db.category_tree[idx];
-            let html = `<div class="sub-title">${cat.name}</div><div class="sub-grid">`;
             
-            // 循环二级分类
-            cat.subs.forEach(sub => {
-                html += `<div class="sub-box" onclick="showCategoryList(${sub.id})">
-                    <img src="${fixUrl(sub.img)}">
-                    <p>${sub.name}</p>
-                </div>`;
-            });
-            html += `</div><div id="subProdList" class="prod-grid"></div>`;
-            document.getElementById('catDynamicContent').innerHTML = html;
+            const level1 = db.category_tree[idx];
+            const container = document.getElementById('catDynamicContent');
             
-            // 默认加载该一级分类下的前10个商品
-            showCategoryList(cat.id, true);
+            let html = '';
+            
+            // 2. 遍历二级分类（subs），比如"扳手类"、"钳类工具"
+            if (level1.subs && level1.subs.length > 0) {
+                level1.subs.forEach(level2 => {
+                    
+                    // 显示二级分类标题 (对应图三中的"扳手类")
+                    html += `<div class="sub-title">${level2.name}</div>`;
+                    
+                    // 建立三级分类的图标网格
+                    html += `<div class="sub-grid">`;
+                    
+                    // 3. 遍历三级分类（children），比如"活动扳手"、"开口扳手"
+                    if (level2.children && level2.children.length > 0) {
+                        level2.children.forEach(level3 => {
+                            // 关键：这里的 onclick 传入 level3.id，用户点图标就能看对应的商品
+                            html += `
+                                <div class="sub-box" onclick="showCategoryList(${level3.id})">
+                                    <img src="${fixUrl(level3.img)}" onerror="this.src='placeholder.svg'">
+                                    <p>${level3.name}</p>
+                                </div>`;
+                        });
+                    } else {
+                        // 如果没有三级分类，则把二级分类自己显示为一个图标
+                        html += `
+                            <div class="sub-box" onclick="showCategoryList(${level2.id})">
+                                <img src="${fixUrl(level2.img)}" onerror="this.src='placeholder.svg'">
+                                <p>${level2.name}</p>
+                            </div>`;
+                    }
+                    html += `</div>`; // 关闭网格
+                });
+            }
+            
+            // 4. 下方预留一个区域显示点击后的商品列表
+            html += `<div id="subProdList" class="prod-grid" style="margin-top:20px;"></div>`;
+            
+            container.innerHTML = html;
+            
+            // 5. 默认显示该一级分类下所有的商品（作为初始展示）
+            showCategoryList(level1.id, true);
         }
 
         function showCategoryList(gid, limit=false) {
