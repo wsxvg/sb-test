@@ -170,10 +170,10 @@
             </div>
         </div>
         <div class="product-list-sort">
-            <div class="sort-item active">综合</div>
-            <div class="sort-item">价格 ▲</div>
-            <div class="sort-item">热度</div>
-            <div class="sort-item">品牌</div>
+            <div class="sort-item active" onclick="sortProducts('default')">综合</div>
+            <div class="sort-item" onclick="if(currentSortType==='price_asc'){sortProducts('price_desc')}else{sortProducts('price_asc')}">价格 ▲</div>
+            <div class="sort-item" onclick="sortProducts('hot')">热度</div>
+            <div class="sort-item" onclick="sortProducts('brand')">品牌</div>
         </div>
         <div class="product-list-content" id="productListContent"></div>
     </div>
@@ -255,53 +255,60 @@
             
             // 2. 遍历二级分类（subs），比如"扳手类"、"钳类工具"
             if (level1.subs && level1.subs.length > 0) {
-                level1.subs.forEach(level2 => {
+                level1.subs.forEach(sub => {
                     
-                    // 显示二级分类标题 (对应图三中的"扳手类")
-                    html += `<div class="sub-title">${level2.name}</div>`;
+                    // 显示二级分类标题
+                    html += `<div class="sub-title">${sub.name}</div>`;
                     
                     // 建立三级分类的图标网格
                     html += `<div class="sub-grid">`;
                     
-                    // 3. 遍历三级分类（children），比如"活动扳手"、"开口扳手"
-                    if (level2.children && level2.children.length > 0) {
-                        level2.children.forEach(level3 => {
-                            // 关键：这里的 onclick 传入 level3.id，用户点图标就能看对应的商品
+                    // 3. 遍历三级分类（children）
+                    if (sub.children && sub.children.length > 0) {
+                        sub.children.forEach(child => {
+                            // 点击三级图标时调用 openProductList
                             html += `
-                                <div class="sub-box" onclick="showCategoryList(${level3.id})">
-                                    <img src="${fixUrl(level3.img)}" onerror="this.src='placeholder.svg'">
-                                    <p>${level3.name}</p>
+                                <div class="sub-box" onclick="openProductList(${child.id}, '${child.name}')">
+                                    <img src="${fixUrl(child.img)}" onerror="this.src='placeholder.svg'">
+                                    <p>${child.name}</p>
                                 </div>`;
                         });
                     } else {
                         // 如果没有三级分类，则把二级分类自己显示为一个图标
                         html += `
-                            <div class="sub-box" onclick="showCategoryList(${level2.id})">
-                                <img src="${fixUrl(level2.img)}" onerror="this.src='placeholder.svg'">
-                                <p>${level2.name}</p>
+                            <div class="sub-box" onclick="openProductList(${sub.id}, '${sub.name}')">
+                                <img src="${fixUrl(sub.img)}" onerror="this.src='placeholder.svg'">
+                                <p>${sub.name}</p>
                             </div>`;
                     }
                     html += `</div>`; // 关闭网格
                 });
             }
             
-            // 4. 下方预留一个区域显示点击后的商品列表
-            html += `<div id="subProdList" style="margin-top:20px;"></div>`;
-            
             container.innerHTML = html;
-            
-            // 5. 默认显示该一级分类下所有的商品（作为初始展示）
-            showCategoryList(level1.id, true);
         }
 
-        function showCategoryList(gid, limit=false) {
-            console.log('打开商品列表，分类ID:', gid);
+        let currentCategoryId = null;
+        let currentCategoryName = '';
+        let currentSortType = 'default'; // default, price_asc, price_desc, hot, brand
+        
+        function openProductList(gid, name) {
+            console.log('打开商品列表，分类ID:', gid, '名称:', name);
             
-            // 打开独立的商品列表页面
-            const allProducts = db.products;
-            const target = allProducts.slice(0, 100);
+            currentCategoryId = gid;
+            currentCategoryName = name;
+            currentSortType = 'default';
             
-            const html = target.map(p => `
+            // 使用 gids 数组过滤商品
+            const filteredProducts = db.products.filter(p => p.gids && p.gids.includes(gid));
+            console.log('找到商品数量:', filteredProducts.length);
+            
+            renderProductList(filteredProducts);
+            document.getElementById('productListPage').classList.add('active');
+        }
+        
+        function renderProductList(products) {
+            const html = products.map(p => `
                 <div class="prod-list-item" onclick="openDetail(${p.id})">
                     <img src="${fixUrl(p.img)}" class="prod-list-img" onerror="this.src='placeholder.svg'">
                     <div class="prod-list-info">
@@ -317,8 +324,59 @@
                 </div>
             `).join('');
             
-            document.getElementById('productListContent').innerHTML = html;
-            document.getElementById('productListPage').classList.add('active');
+            document.getElementById('productListContent').innerHTML = html || '<div style="padding:20px; text-align:center; color:#999;">暂无商品</div>';
+        }
+        
+        function sortProducts(type) {
+            if (!currentCategoryId) return;
+            
+            // 重新获取当前分类的商品
+            let products = db.products.filter(p => p.gids && p.gids.includes(currentCategoryId));
+            
+            // 根据排序类型排序
+            if (type === 'price_asc') {
+                products.sort((a, b) => (a.price || 0) - (b.price || 0));
+                currentSortType = 'price_asc';
+            } else if (type === 'price_desc') {
+                products.sort((a, b) => (b.price || 0) - (a.price || 0));
+                currentSortType = 'price_desc';
+            } else if (type === 'hot') {
+                products.sort((a, b) => (b.hot || 0) - (a.hot || 0));
+                currentSortType = 'hot';
+            } else if (type === 'brand') {
+                products.sort((a, b) => {
+                    const brandA = a.brand || '';
+                    const brandB = b.brand || '';
+                    return brandA.localeCompare(brandB, 'zh-CN');
+                });
+                currentSortType = 'brand';
+            } else {
+                // 默认排序（按ID）
+                products.sort((a, b) => a.id - b.id);
+                currentSortType = 'default';
+            }
+            
+            // 更新排序按钮状态
+            updateSortButtons();
+            
+            // 重新渲染商品列表
+            renderProductList(products);
+        }
+        
+        function updateSortButtons() {
+            document.querySelectorAll('.sort-item').forEach(item => item.classList.remove('active'));
+            
+            if (currentSortType === 'default') {
+                document.querySelector('.sort-item:nth-child(1)').classList.add('active');
+            } else if (currentSortType === 'price_asc' || currentSortType === 'price_desc') {
+                const priceBtn = document.querySelector('.sort-item:nth-child(2)');
+                priceBtn.classList.add('active');
+                priceBtn.textContent = currentSortType === 'price_asc' ? '价格 ▲' : '价格 ▼';
+            } else if (currentSortType === 'hot') {
+                document.querySelector('.sort-item:nth-child(3)').classList.add('active');
+            } else if (currentSortType === 'brand') {
+                document.querySelector('.sort-item:nth-child(4)').classList.add('active');
+            }
         }
         
         function closeProductList() {
