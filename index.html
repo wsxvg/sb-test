@@ -6,63 +6,53 @@
     <meta name="referrer" content="no-referrer">
     <title>世标五金商城</title>
     <style>
-        :root { --primary: #3296F0; --bg: #f5f5f5; --border: #eeeeee; }
+        :root { --primary: #3296F0; --bg: #ffffff; --border: #eeeeee; --gray-bg: #F7F7F7; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #333; overflow-x: hidden; }
+        body { font-family: -apple-system, sans-serif; background: white; color: #333; overflow-x: hidden; }
 
-        /* 顶部统一搜索条 */
-        .top-search { position: fixed; top: 0; width: 100%; height: 50px; background: white; z-index: 1000; padding: 8px 15px; border-bottom: 1px solid var(--border); display: none; }
-        .search-box { background: #F2F3F5; height: 34px; border-radius: 17px; display: flex; align-items: center; padding: 0 15px; color: #999; font-size: 14px; }
-
-        /* 首页顶部栏 */
-        .home-header { position: fixed; top: 0; width: 100%; height: 50px; background: white; z-index: 1000; padding: 8px 15px; border-bottom: 1px solid var(--border); display: none; align-items: center; justify-content: space-between; }
-        .home-header.show { display: flex; }
-        .home-header .logo { height: 34px; }
-        .home-header .right-icons { display: flex; gap: 15px; align-items: center; }
-        .home-header .right-icons img { height: 24px; width: 24px; }
+        /* --- 顶部复刻图一 --- */
+        .top-nav-bar { 
+            position: fixed; top: 0; width: 100%; height: 55px; background: white; 
+            z-index: 1000; display: flex; align-items: center; padding: 0 10px; gap: 10px;
+        }
+        .orange-logo { width: 32px; height: 32px; background: #FF7033; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .orange-logo::after { content: "∨"; color: white; font-weight: bold; font-size: 14px; }
+        
+        .search-container { flex: 1; background: #EFEFEF; height: 36px; border-radius: 18px; display: flex; align-items: center; padding: 0 15px; color: #888; font-size: 14px; }
+        .search-container i { margin-right: 8px; font-style: normal; }
+        
+        .scan-icon { width: 28px; height: 28px; opacity: 0.7; }
 
         /* 页面切换控制 */
-        .page { display: none; padding-bottom: 60px; min-height: 100vh; }
+        .page { display: none; padding-top: 55px; padding-bottom: 60px; height: 100vh; }
         .page.active { display: block; }
-        #homePage { padding-top: 50px; }
-        #cartPage, #mePage { padding-top: 0; }
-        #categoryPage { padding-top: 50px; }
 
-        /* --- 首页组件自适应样式 --- */
-        .home-section { width: 100%; background: white; margin-bottom: 10px; overflow: hidden; }
+        /* --- 分类页深度复刻 --- */
+        .cat-view { display: flex; height: calc(100vh - 115px); overflow: hidden; }
         
-        /* Type 1: 大轮播图 */
-        .row-type-1 img { width: 100%; display: block; }
+        /* 左侧菜单 */
+        .cat-left { width: 100px; background: var(--gray-bg); overflow-y: auto; flex-shrink: 0; }
+        .cat-left-item { 
+            padding: 18px 10px; font-size: 14px; text-align: center; color: #333; 
+            border-left: 4px solid transparent; line-height: 1.4;
+        }
+        .cat-left-item.active { 
+            background: white; color: var(--primary); 
+            border-left-color: var(--primary); font-weight: bold; 
+        }
 
-        /* Type 2: 公告栏 */
-        .row-type-2 { background: white; padding: 10px 15px; display: flex; align-items: center; font-size: 13px; }
-        .row-type-2 .label { color: #E64340; font-weight: bold; border-right: 1px solid #ddd; padding-right: 10px; margin-right: 10px; flex-shrink: 0; }
-        .row-type-2 marquee { flex: 1; }
-
-        /* Type 6/7/13: 圆形品牌图标网格 (一行5个) */
-        .row-type-brand { display: grid; grid-template-columns: repeat(5, 1fr); padding: 15px 5px; gap: 10px 0; }
-        .brand-item { text-align: center; }
-        .brand-item .circle { width: 55px; height: 55px; border-radius: 50%; border: 1px solid #f0f0f0; margin: 0 auto 5px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: white; }
-        .brand-item img { width: 100%; height: 100%; object-fit: cover; }
-        .brand-item p { font-size: 11px; color: #333; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding: 0 2px; }
-
-        /* --- 分类页样式 --- */
-        .cat-view { display: flex; height: calc(100vh - 110px); background: white; overflow: hidden; }
-        .cat-left { width: 90px; background: #F7F7F7; overflow-y: auto; }
-        .cat-left-item { padding: 18px 5px; font-size: 13px; text-align: center; color: #666; border-left: 3px solid transparent; }
-        .cat-left-item.active { background: white; color: var(--primary); border-left-color: var(--primary); font-weight: bold; }
-        .cat-right { flex: 1; overflow-y: auto; padding: 10px; }
-        .sub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; }
-        .sub-item { text-align: center; font-size: 11px; color: #666; }
-        .sub-item img { width: 100%; aspect-ratio: 1; border-radius: 4px; background: #f9f9f9; margin-bottom: 5px; }
-
-        /* 通用商品列表样式 */
-        .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 10px; }
-        .prod-card { background: white; border-radius: 8px; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
-        .prod-name { font-size: 12px; height: 34px; margin: 5px 0; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .prod-price { color: #ff5000; font-weight: bold; font-size: 15px; }
-        .prod-info { font-size: 10px; color: #999; margin-top: 3px; }
+        /* 右侧内容 */
+        .cat-right { flex: 1; overflow-y: auto; padding: 0 15px; background: white; }
+        .sub-group-title { 
+            font-size: 15px; font-weight: bold; padding: 15px 0 10px; 
+            position: sticky; top: 0; background: white; z-index: 10;
+        }
+        
+        /* 3列网格复刻 */
+        .sub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 10px; padding-bottom: 30px; }
+        .sub-item { text-align: center; display: flex; flex-direction: column; align-items: center; }
+        .sub-item img { width: 70px; height: 70px; object-fit: contain; margin-bottom: 8px; }
+        .sub-item p { font-size: 12px; color: #333; line-height: 1.2; word-break: break-all; height: 28px; overflow: hidden; }
 
         /* 底部 TabBar */
         .tabbar { position: fixed; bottom: 0; width: 100%; height: 55px; background: white; border-top: 1px solid #ddd; display: flex; z-index: 2000; }
@@ -70,78 +60,62 @@
         .tab-item img { width: 24px; height: 24px; margin-bottom: 3px; }
         .tab-item.active { color: var(--primary); }
 
-        /* 购物车和我的 占位 */
-        .empty-view { padding-top: 100px; text-align: center; color: #999; background: white; min-height: 100vh; }
-        .me-header { background: var(--primary); padding: 40px 20px; color: white; display: flex; align-items: center; gap: 15px; }
-        .avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid white; background: #fff; }
+        /* 其他页面样式 */
+        .placeholder { padding: 100px 20px; text-align: center; color: #999; }
     </style>
 </head>
 <body>
 
-    <div class="top-search" id="searchBar">
-        <div class="search-box">🔍 搜索商品编码或名称</div>
-    </div>
-
-    <div class="home-header" id="homeHeader">
-        <img src="images/logo.png" class="logo" alt="Logo">
-        <div class="right-icons">
-            <img src="images/home-notice-null.png" alt="通知">
-            <img src="images/home-scan.png" alt="扫一扫">
-            <img src="images/home-search.png" alt="搜索">
+    <!-- 顶部复刻 -->
+    <div class="top-nav-bar" id="globalHeader">
+        <div class="orange-logo"></div>
+        <div class="search-container">
+            <i>🔍</i> 搜索产品
         </div>
+        <img src="images/home-scan.png" class="scan-icon" onerror="this.style.display='none'">
     </div>
 
     <!-- 1. 首页 -->
     <div id="homePage" class="page active">
-        <div id="homeContent"></div> <!-- 动态加载内容 -->
+        <div id="homeContent" class="placeholder">正在加载首页内容...</div>
     </div>
 
-    <!-- 2. 分类页 -->
+    <!-- 2. 分类页 (复刻图一) -->
     <div id="categoryPage" class="page">
         <div class="cat-view">
             <div id="catLeft" class="cat-left"></div>
             <div id="catRight" class="cat-right">
-                <div id="subGrid" class="sub-grid"></div>
-                <div id="catProducts" class="product-grid" style="margin-top:20px;"></div>
+                <div id="categoryDynamicArea"></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. 购物车 (UI) -->
+    <!-- 3. 购物车 -->
     <div id="cartPage" class="page">
-        <div class="empty-view">
-            <img src="https://kaifa.sintoyu.cn/xcximages/cart-empty2.png" width="180">
-            <p>购物车空空如也~~</p>
+        <div class="placeholder">
+            <img src="https://kaifa.sintoyu.cn/xcximages/cart-empty2.png" width="180"><br>
+            购物车空空如也~~
         </div>
     </div>
 
-    <!-- 4. 我的 (UI) -->
-    <div id="mePage" class="page" style="padding-top: 0;">
-        <div class="me-header">
-            <div class="avatar"></div>
-            <div>
-                <div style="font-size: 18px; font-weight: bold;">17826038535</div>
-                <div style="font-size: 12px; opacity: 0.8; margin-top: 4px;">普通会员</div>
-            </div>
-        </div>
-        <div style="background:white; padding:20px; text-align:center; color:#999; margin-top:10px;">
-            个人资料及设置
-        </div>
+    <!-- 4. 我的 -->
+    <div id="mePage" class="page">
+        <div class="placeholder">个人中心界面</div>
     </div>
 
     <!-- 底部导航 -->
     <div class="tabbar">
         <div class="tab-item active" onclick="switchTab('home', this)">
-            <img src="images/home_un.png" class="icon"><span>首页</span>
+            <img src="images/home_un.png"><span>首页</span>
         </div>
         <div class="tab-item" onclick="switchTab('category', this)">
-            <img src="images/category_un.png" class="icon"><span>分类</span>
+            <img src="images/category_un.png"><span>分类</span>
         </div>
         <div class="tab-item" onclick="switchTab('cart', this)">
-            <img src="images/cart_un.png" class="icon"><span>购物车</span>
+            <img src="images/cart_un.png"><span>购物车</span>
         </div>
         <div class="tab-item" onclick="switchTab('me', this)">
-            <img src="images/user_un.png" class="icon"><span>我</span>
+            <img src="images/user_un.png"><span>我</span>
         </div>
     </div>
 
@@ -151,53 +125,20 @@
         let homeConfig = null;
 
         async function init() {
-            // 加载两个数据源
-            const [resP, resH] = await Promise.all([
-                fetch('products_db.json').then(r => r.json()),
-                fetch('home_config.json').then(r => r.json())
-            ]);
-            productsDB = resP;
-            homeConfig = resH;
-
-            renderHomePage();
-            renderCategoryLeft();
+            try {
+                const [resP, resH] = await Promise.all([
+                    fetch('products_db.json').then(r => r.json()),
+                    fetch('home_config.json').then(r => r.json())
+                ]);
+                productsDB = resP;
+                homeConfig = resH;
+                renderCategoryLeft();
+            } catch (e) {
+                console.error("数据加载失败", e);
+            }
         }
 
-        // --- 核心：首页动态排版逻辑 ---
-        function renderHomePage() {
-            const container = document.getElementById('homeContent');
-            let html = '';
-
-            homeConfig.forEach(row => {
-                if (row.type === 1) { // 大图/轮播
-                    html += `<div class="home-section row-type-1">
-                        <img src="${row.data[0].local}">
-                    </div>`;
-                } else if (row.type === 2) { // 公告
-                    html += `<div class="home-section row-type-2">
-                        <span class="label">店铺公告</span>
-                        <marquee>欢迎来到世标工品汇</marquee>
-                    </div>`;
-                } else if (row.type === 6 || row.type === 7 || row.type === 13) { // 品牌/分类图标网格
-                    html += `<div class="home-section row-type-brand">`;
-                    row.data.forEach(item => {
-                        html += `<div class="brand-item">
-                            <div class="circle"><img src="${item.local}"></div>
-                            <p>${item.title}</p>
-                        </div>`;
-                    });
-                    html += `</div>`;
-                }
-            });
-
-            // 首页底部随机补一些商品推荐
-            html += `<div class="section-title" style="padding:15px; font-weight:bold;">热门推荐</div>
-                     <div class="product-grid">${productsDB.products.slice(0, 10).map(p => createCard(p)).join('')}</div>`;
-            
-            container.innerHTML = html;
-        }
-
-        // --- 核心：分类逻辑 ---
+        // --- 分类渲染逻辑（关键修改） ---
         function renderCategoryLeft() {
             const left = document.getElementById('catLeft');
             left.innerHTML = productsDB.category_tree.map((cat, idx) => `
@@ -214,33 +155,44 @@
             items[idx].classList.add('active');
 
             const cat = productsDB.category_tree[idx];
+            const container = document.getElementById('categoryDynamicArea');
             
-            // 渲染二级分类图标
-            const subGrid = document.getElementById('subGrid');
-            subGrid.innerHTML = cat.subs.map(sub => `
-                <div class="sub-item" onclick="filterGoods(${sub.id})">
-                    <img src="${sub.img ? (sub.img.startsWith('http')?sub.img : IMG_HOST+sub.img) : 'placeholder.svg'}" onerror="this.src='placeholder.svg'">
-                    <p>${sub.name}</p>
-                </div>
-            `).join('');
-
-            // 初始显示该一级类下的前20个商品
-            const initGoods = productsDB.products.filter(p => p.gid == cat.id);
-            document.getElementById('catProducts').innerHTML = initGoods.slice(0, 20).map(p => createCard(p)).join('');
+            let html = '';
+            
+            // 易订货的逻辑：如果有二级分类(subs)，我们要按组显示
+            if (cat.subs && cat.subs.length > 0) {
+                // 模拟图一：我们把二级分类的名字作为一个大标题，下面列出它的子类（如果有）
+                // 如果没有三级类，就直接显示二级类
+                html += `<div class="sub-group-title">${cat.name}</div>`;
+                html += `<div class="sub-grid">`;
+                
+                cat.subs.forEach(sub => {
+                    const imgUrl = fixImgUrl(sub.img);
+                    html += `
+                        <div class="sub-item" onclick="alert('点击了: ${sub.name}')">
+                            <img src="${imgUrl}" onerror="this.src='placeholder.svg'">
+                            <p>${sub.name}</p>
+                        </div>`;
+                });
+                
+                // 补一个“全部”按钮，复刻图二
+                html += `
+                    <div class="sub-item">
+                        <div style="width:70px; height:70px; background:#f0f7ff; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--primary); font-size:24px;">⊞</div>
+                        <p>全部${cat.name}</p>
+                    </div>`;
+                
+                html += `</div>`;
+            }
+            
+            container.innerHTML = html;
         }
 
-        function filterGoods(gid) {
-            const list = productsDB.products.filter(p => p.gid == gid);
-            document.getElementById('catProducts').innerHTML = list.map(p => createCard(p)).join('');
-        }
-
-        function createCard(p) {
-            return `<div class="prod-card">
-                <img src="${p.img.startsWith('http')?p.img : IMG_HOST+p.img}" loading="lazy" onerror="this.src='placeholder.svg'">
-                <div class="prod-name">${p.name}</div>
-                <div class="prod-price">¥${p.price}</div>
-                <div class="prod-info">${p.sale_info || '编号:' + p.num}</div>
-            </div>`;
+        // 图片路径修正函数
+        function fixImgUrl(url) {
+            if (!url) return 'placeholder.svg';
+            if (url.startsWith('http')) return url;
+            return IMG_HOST + (url.startsWith('/') ? '' : '/') + url;
         }
 
         function switchTab(name, el) {
@@ -248,20 +200,12 @@
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             document.getElementById(name + 'Page').classList.add('active');
             el.classList.add('active');
-            // 只在分类页显示搜索框
-            document.getElementById('searchBar').style.display = (name === 'category') ? 'block' : 'none';
-            // 只在首页显示顶部栏
-            const homeHeader = document.getElementById('homeHeader');
-            if (name === 'home') {
-                homeHeader.classList.add('show');
-            } else {
-                homeHeader.classList.remove('show');
-            }
+            
+            // 只有“我”的页面隐藏顶部搜索栏
+            document.getElementById('globalHeader').style.display = (name === 'me') ? 'none' : 'flex';
         }
 
         init();
-        // 首页默认显示顶部栏
-        document.getElementById('homeHeader').classList.add('show');
     </script>
 </body>
 </html>
