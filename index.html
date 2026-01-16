@@ -324,8 +324,15 @@
         }
 
         function fixUrl(u) {
-            if(!u) return 'placeholder.svg';
-            return u.startsWith('http') ? u : IMG_HOST + (u.startsWith('/')?'':'/') + u;
+            if (!u || u === "") return 'placeholder.svg';
+            
+            // 如果已经是完整的 http 或 https 开头了，直接用，不要再加前缀！
+            if (u.toLowerCase().startsWith('http')) {
+                return u;
+            }
+            
+            // 只有当它是相对路径（比如 /UploadFiles/...）时，才拼接前缀
+            return IMG_HOST + (u.startsWith('/') ? '' : '/') + u;
         }
 
         function handleSearch(e) {
