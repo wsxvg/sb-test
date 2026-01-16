@@ -67,19 +67,19 @@
         .tab-btn.active { color: var(--primary); }
 
         /* 调试：确保内容可见 */
-        #homePage { background: white !important; }
-        #homeContent { min-height: 100vh !important; }
+        #homePage { background: white !important; min-height: 100vh !important; }
+        #homeContent { min-height: 100vh !important; display: block !important; width: 100% !important; }
 
         /* --- 首页组件 --- */
-        .home-row { background: white; margin-bottom: 8px; width: 100%; }
+        .home-row { background: white; margin-bottom: 8px; width: 100%; display: block; }
         .row-banner img { width: 100%; display: block; }
         .row-notice { padding: 10px 15px; display: flex; align-items: center; font-size: 13px; }
         .notice-tag { color: #E64340; font-weight: bold; padding-right: 10px; border-right: 1px solid #eee; margin-right: 10px; }
 
         /* 通用商品卡片 */
-        .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
-        .prod-card { background: white; padding: 10px; border-radius: 8px; }
-        .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+        .prod-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; background: var(--bg); }
+        .prod-card { background: white; padding: 10px; border-radius: 8px; display: block; }
+        .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; display: block; }
         .prod-price { color: #ff5000; font-weight: bold; font-size: 16px; margin-top: 5px; }
 
         /* 图片懒加载占位 */
