@@ -70,6 +70,12 @@
         .prod-card img { width: 100%; aspect-ratio: 1; object-fit: contain; }
         .prod-price { color: #ff5000; font-weight: bold; font-size: 16px; margin-top: 5px; }
 
+        /* 图片懒加载占位 */
+        img[data-src] { background: #f0f0f0; }
+        img.lazy-loading { opacity: 0.6; }
+        img.lazy-loaded { animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         /* 商品列表样式（图片中的样式） */
         .prod-list-item { display: flex; align-items: center; padding: 15px; background: white; border-bottom: 1px solid #f0f0f0; gap: 12px; }
         .prod-list-img { width: 80px; height: 80px; object-fit: contain; flex-shrink: 0; background: #f9f9f9; border-radius: 4px; }
@@ -223,14 +229,76 @@
         const IMG_HOST = "https://kaifa.sintoyu.cn";
         let db = null, homeData = null;
 
+        // ===== 工具函数 =====
+        
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // 图片懒加载观察器
+        let lazyImageObserver = null;
+        
+        function initLazyLoad() {
+            if ('IntersectionObserver' in window) {
+                lazyImageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            const src = img.getAttribute('data-src');
+                            if (src) {
+                                img.classList.add('lazy-loading');
+                                img.src = src;
+                                img.onload = () => {
+                                    img.classList.remove('lazy-loading');
+                                    img.classList.add('lazy-loaded');
+                                    img.removeAttribute('data-src');
+                                };
+                                img.onerror = () => {
+                                    img.src = 'placeholder.svg';
+                                    img.classList.remove('lazy-loading');
+                                };
+                            }
+                            observer.unobserve(img);
+                        }
+                    });
+                }, {
+                    rootMargin: '50px' // 提前 50px 开始加载
+                });
+            }
+        }
+
+        function observeLazyImages(container) {
+            if (!lazyImageObserver) return;
+            const lazyImages = container.querySelectorAll('img[data-src]');
+            lazyImages.forEach(img => lazyImageObserver.observe(img));
+        }
+
+        // ===== 初始化 =====
+
         async function init() {
             const [p, h] = await Promise.all([
                 fetch('products_db.json').then(r => r.json()),
                 fetch('home_config.json').then(r => r.json())
             ]);
             db = p; homeData = h;
+            
+            // 初始化懒加载
+            initLazyLoad();
+            
             renderHome();
             renderCatMenu();
+            
+            // 初始化事件委托
+            initEventDelegation();
         }
 
         // --- 首页渲染 ---
@@ -249,16 +317,21 @@
                 }
             });
             
-            html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid">`;
+            html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid" id="homeProductGrid">`;
             db.products.slice(0, 10).forEach(item => {
-                html += `<div class="prod-card" onclick="openDetail(${item.id})">
-                    <img src="${fixUrl(item.img)}">
+                html += `<div class="prod-card" data-id="${item.id}">
+                    <img data-src="${fixUrl(item.img)}" src="placeholder.svg" alt="${item.name}">
                     <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
                     <div class="prod-price">¥${item.price}</div>
                 </div>`;
             });
             html += `</div>`;
-            document.getElementById('homeContent').innerHTML = html;
+            
+            const homeContent = document.getElementById('homeContent');
+            homeContent.innerHTML = html;
+            
+            // 启动懒加载
+            observeLazyImages(homeContent);
         }
 
         // --- 分类渲染 (图一逻辑) ---
@@ -291,18 +364,18 @@
                     // 3. 遍历三级分类（children）
                     if (sub.children && sub.children.length > 0) {
                         sub.children.forEach(child => {
-                            // 点击三级图标时调用 openProductList
+                            // 使用 data 属性存储分类信息，移除 onclick
                             html += `
-                                <div class="sub-box" onclick="openProductList(${child.id}, '${child.name}')">
-                                    <img src="${fixUrl(child.img)}" onerror="this.src='placeholder.svg'">
+                                <div class="sub-box" data-gid="${child.id}" data-name="${child.name}">
+                                    <img data-src="${fixUrl(child.img)}" src="placeholder.svg" alt="${child.name}">
                                     <p>${child.name}</p>
                                 </div>`;
                         });
                     } else {
                         // 如果没有三级分类，则把二级分类自己显示为一个图标
                         html += `
-                            <div class="sub-box" onclick="openProductList(${sub.id}, '${sub.name}')">
-                                <img src="${fixUrl(sub.img)}" onerror="this.src='placeholder.svg'">
+                            <div class="sub-box" data-gid="${sub.id}" data-name="${sub.name}">
+                                <img data-src="${fixUrl(sub.img)}" src="placeholder.svg" alt="${sub.name}">
                                 <p>${sub.name}</p>
                             </div>`;
                     }
@@ -311,6 +384,9 @@
             }
             
             container.innerHTML = html;
+            
+            // 启动懒加载
+            observeLazyImages(container);
         }
 
         let currentCategoryId = null;
@@ -362,8 +438,8 @@
             
             products.forEach(p => {
                 tempDiv.innerHTML = `
-                    <div class="prod-list-item" onclick="openDetail(${p.id})">
-                        <img src="${fixUrl(p.img)}" class="prod-list-img" onerror="this.src='placeholder.svg'">
+                    <div class="prod-list-item" data-id="${p.id}">
+                        <img data-src="${fixUrl(p.img)}" src="placeholder.svg" class="prod-list-img" alt="${p.name}">
                         <div class="prod-list-info">
                             <div class="prod-list-name">${p.name}</div>
                             <div class="prod-list-detail">
@@ -381,6 +457,9 @@
             
             container.innerHTML = '';
             container.appendChild(fragment);
+            
+            // 启动懒加载
+            observeLazyImages(container);
         }
         
         function sortProducts(type) {
@@ -446,9 +525,9 @@
         }
         
         function openBrandFilter() {
-            // 渲染品牌列表
+            // 渲染品牌列表，使用 data 属性避免 XSS
             const html = availableBrands.map(brand => 
-                `<div class="brand-item ${selectedBrand === brand ? 'active' : ''}" onclick="selectBrand('${brand}')">${brand}</div>`
+                `<div class="brand-item ${selectedBrand === brand ? 'active' : ''}" data-brand="${brand.replace(/"/g, '&quot;')}">${brand}</div>`
             ).join('');
             
             document.getElementById('brandFilterContent').innerHTML = html || '<div style="grid-column: 1/-1; text-align:center; color:#999;">暂无品牌</div>';
@@ -457,16 +536,20 @@
         
         function selectBrand(brand) {
             // 切换选中状态
-            document.querySelectorAll('.brand-item').forEach(item => {
-                if (item.textContent === brand) {
+            const items = document.querySelectorAll('.brand-item');
+            let found = false;
+            
+            items.forEach(item => {
+                if (item.getAttribute('data-brand') === brand) {
                     if (item.classList.contains('active')) {
                         item.classList.remove('active');
                         selectedBrand = null;
                     } else {
-                        document.querySelectorAll('.brand-item').forEach(i => i.classList.remove('active'));
+                        items.forEach(i => i.classList.remove('active'));
                         item.classList.add('active');
                         selectedBrand = brand;
                     }
+                    found = true;
                 }
             });
         }
@@ -555,37 +638,42 @@
             return IMG_HOST + (u.startsWith('/') ? '' : '/') + u;
         }
 
+        // 搜索函数（带防抖）
+        const debouncedSearch = debounce((kw) => {
+            if (!kw) return;
+            
+            const results = db.products.filter(p => 
+                p.name.toLowerCase().includes(kw) || 
+                (p.num && p.num.toLowerCase().includes(kw)) ||
+                (p.brand && p.brand.toLowerCase().includes(kw))
+            );
+            
+            // 使用商品列表页展示搜索结果
+            currentCategoryId = 'search';
+            currentCategoryName = `搜索"${kw}"`;
+            currentSortType = 'default';
+            selectedBrand = null;
+            
+            // 缓存搜索结果
+            currentProducts = results;
+            
+            // 提取搜索结果中的品牌
+            const brandSet = new Set();
+            results.forEach(p => {
+                if (p.brand && p.brand.trim()) {
+                    brandSet.add(p.brand.trim());
+                }
+            });
+            availableBrands = Array.from(brandSet).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+            
+            renderProductList(results);
+            document.getElementById('productListPage').classList.add('active');
+        }, 300); // 300ms 防抖
+
         function handleSearch(e) {
             if(e.key === 'Enter') {
                 const kw = e.target.value.trim().toLowerCase();
-                if (!kw) return;
-                
-                const results = db.products.filter(p => 
-                    p.name.toLowerCase().includes(kw) || 
-                    (p.num && p.num.toLowerCase().includes(kw)) ||
-                    (p.brand && p.brand.toLowerCase().includes(kw))
-                );
-                
-                // 使用商品列表页展示搜索结果
-                currentCategoryId = 'search';
-                currentCategoryName = `搜索"${kw}"`;
-                currentSortType = 'default';
-                selectedBrand = null;
-                
-                // 缓存搜索结果
-                currentProducts = results;
-                
-                // 提取搜索结果中的品牌
-                const brandSet = new Set();
-                results.forEach(p => {
-                    if (p.brand && p.brand.trim()) {
-                        brandSet.add(p.brand.trim());
-                    }
-                });
-                availableBrands = Array.from(brandSet).sort((a, b) => a.localeCompare(b, 'zh-CN'));
-                
-                renderProductList(results);
-                document.getElementById('productListPage').classList.add('active');
+                debouncedSearch(kw);
             }
         }
         
@@ -623,6 +711,46 @@
                 
                 renderProductList(results);
             }
+        }
+
+        // ===== 事件委托初始化 =====
+        function initEventDelegation() {
+            // 首页商品卡片点击
+            document.getElementById('homeContent').addEventListener('click', (e) => {
+                const card = e.target.closest('.prod-card');
+                if (card) {
+                    const id = card.getAttribute('data-id');
+                    if (id) openDetail(parseInt(id));
+                }
+            });
+
+            // 分类页图标点击
+            document.getElementById('catDynamicContent').addEventListener('click', (e) => {
+                const box = e.target.closest('.sub-box');
+                if (box) {
+                    const gid = box.getAttribute('data-gid');
+                    const name = box.getAttribute('data-name');
+                    if (gid && name) openProductList(parseInt(gid), name);
+                }
+            });
+
+            // 商品列表页商品点击
+            document.getElementById('productListContent').addEventListener('click', (e) => {
+                const item = e.target.closest('.prod-list-item');
+                if (item) {
+                    const id = item.getAttribute('data-id');
+                    if (id) openDetail(parseInt(id));
+                }
+            });
+
+            // 品牌筛选点击
+            document.getElementById('brandFilterContent').addEventListener('click', (e) => {
+                const brandItem = e.target.closest('.brand-item');
+                if (brandItem) {
+                    const brand = brandItem.getAttribute('data-brand');
+                    if (brand) selectBrand(brand);
+                }
+            });
         }
 
         init();
