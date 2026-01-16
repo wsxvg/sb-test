@@ -31,14 +31,11 @@ jobs:
           MACHINEID: ${{ secrets.MACHINEID }}
           USERNAME: ${{ secrets.USERNAME }}
           XCXAPPID: ${{ secrets.XCXAPPID }}
-        run: |
-          cd static-shop-test
-          python demo.py
+        run: python demo.py
         continue-on-error: false
       
       - name: 验证数据文件
         run: |
-          cd static-shop-test
           if [ ! -f "products_db.json" ]; then
             echo "错误：products_db.json 文件未生成"
             exit 1
@@ -60,13 +57,12 @@ jobs:
       - name: 检查数据变化
         id: check_changes
         run: |
-          cd static-shop-test
           if git diff --quiet products_db.json; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "数据无变化，跳过提交"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
-            OLD_COUNT=$(git show HEAD:static-shop-test/products_db.json | python -c "import json,sys; data=json.load(sys.stdin); print(len(data.get('products', [])))" 2>/dev/null || echo "0")
+            OLD_COUNT=$(git show HEAD:products_db.json | python -c "import json,sys; data=json.load(sys.stdin); print(len(data.get('products', [])))" 2>/dev/null || echo "0")
             NEW_COUNT=$(python -c "import json; data=json.load(open('products_db.json')); print(len(data.get('products', [])))")
             DIFF=$((NEW_COUNT - OLD_COUNT))
             echo "old_count=$OLD_COUNT" >> $GITHUB_OUTPUT
@@ -78,7 +74,6 @@ jobs:
       - name: 提交并推送更改
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
-          cd static-shop-test
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           BEIJING_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
