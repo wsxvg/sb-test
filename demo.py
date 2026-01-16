@@ -2,18 +2,20 @@ import requests
 import json
 import time
 import urllib3
+import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+# 优先从环境变量读取，如果没有则使用默认值
 CONFIG = {
     "host": "https://ydh88.sintoyu.cn",
     "img_host": "https://kaifa.sintoyu.cn",
-    "_ydhid": "925A0C75146730FFF9078159F7E72C9A",
-    "_machineid": "oztRg413C-XBkvyZdNF4zUYq7i6I",
-    "_username": "13666527113",
-    "_xcxappid": "wxebf4afe4b3c9a03d"
+    "_ydhid": os.getenv("YDHID", "925A0C75146730FFF9078159F7E72C9A"),
+    "_machineid": os.getenv("MACHINEID", "oztRg413C-XBkvyZdNF4zUYq7i6I"),
+    "_username": os.getenv("USERNAME", "13666527113"),
+    "_xcxappid": os.getenv("XCXAPPID", "wxebf4afe4b3c9a03d")
 }
 
 class StoreDeepScraper:

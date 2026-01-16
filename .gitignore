@@ -1,2 +1,16 @@
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+*.egg-info/
+
+# 备份文件
+*.bak
+products_db_backup.json
