@@ -31,7 +31,9 @@ jobs:
           MACHINEID: ${{ secrets.MACHINEID }}
           USERNAME: ${{ secrets.USERNAME }}
           XCXAPPID: ${{ secrets.XCXAPPID }}
-        run: python demo.py
+          PYTHONUNBUFFERED: 1
+        run: python -u demo.py
+        timeout-minutes: 30
         continue-on-error: false
       
       - name: 验证数据文件
