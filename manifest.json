@@ -1,7 +1,7 @@
 {
-  "name": "世标五金静态测试版",
-  "short_name": "世标五金",
-  "description": "世标五金商品浏览 - 静态数据测试",
+  "name": "汇友机电商城",
+  "short_name": "汇友机电",
+  "description": "汇友机电有限公司商品浏览",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",

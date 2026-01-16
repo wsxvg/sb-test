@@ -6,9 +6,9 @@
     <meta name="referrer" content="no-referrer">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="世标五金">
+    <meta name="apple-mobile-web-app-title" content="汇友机电">
     <link rel="manifest" href="manifest.json">
-    <title>世标五金商城</title>
+    <title>汇友机电商城</title>
     <style>
         :root { --primary: #3296F0; --orange: #FF7033; --bg: #F7F7F7; --border: #eeeeee; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -122,12 +122,7 @@
     <!-- 顶部导航 -->
     <div class="top-nav show home-mode" id="topNav">
         <!-- 首页模式内容 -->
-        <img src="images/logo.png" class="logo" alt="Logo">
-        <div class="right-icons">
-            <img src="images/home-notice-null.png" alt="通知">
-            <img src="images/home-scan.png" alt="扫一扫">
-            <img src="images/home-search.png" alt="搜索">
-        </div>
+        <div style="font-size: 18px; font-weight: bold; color: #333;">汇友机电有限公司</div>
     </div>
 
     <!-- 1. 首页 -->
@@ -327,7 +322,7 @@
                     html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
                     // 第一张图片后面添加公告
                     if(firstBanner) {
-                        html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到世标工品汇</marquee></div>`;
+                        html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到汇友机电有限公司</marquee></div>`;
                         firstBanner = false;
                     }
                 }
@@ -617,12 +612,7 @@
                 topNav.style.display = 'flex';
                 topNav.className = 'top-nav show home-mode';
                 topNav.innerHTML = `
-                    <img src="images/logo.png" class="logo" alt="Logo">
-                    <div class="right-icons">
-                        <img src="images/home-notice-null.png" alt="通知">
-                        <img src="images/home-scan.png" alt="扫一扫">
-                        <img src="images/home-search.png" alt="搜索">
-                    </div>
+                    <div style="font-size: 18px; font-weight: bold; color: #333;">汇友机电有限公司</div>
                 `;
             } else if (type === 'category') {
                 // 分类页模式
