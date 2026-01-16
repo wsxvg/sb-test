@@ -296,53 +296,102 @@
         // ===== 初始化 =====
 
         async function init() {
-            const [p, h] = await Promise.all([
-                fetch('products_db.json').then(r => r.json()),
-                fetch('home_config.json').then(r => r.json())
-            ]);
-            db = p; homeData = h;
-            
-            // 初始化懒加载
-            initLazyLoad();
-            
-            renderHome();
-            renderCatMenu();
-            
-            // 初始化事件委托
-            initEventDelegation();
+            try {
+                console.log('开始加载数据...');
+                const [p, h] = await Promise.all([
+                    fetch('products_db.json').then(r => {
+                        if (!r.ok) throw new Error('无法加载商品数据');
+                        return r.json();
+                    }),
+                    fetch('home_config.json').then(r => {
+                        if (!r.ok) throw new Error('无法加载首页配置');
+                        return r.json();
+                    })
+                ]);
+                
+                db = p; 
+                homeData = h;
+                console.log('数据加载成功，商品数量:', db.products.length);
+                
+                // 初始化懒加载
+                initLazyLoad();
+                
+                renderHome();
+                renderCatMenu();
+                
+                // 初始化事件委托
+                initEventDelegation();
+                
+                console.log('初始化完成');
+            } catch (error) {
+                console.error('初始化失败:', error);
+                document.getElementById('homeContent').innerHTML = `
+                    <div style="padding: 40px 20px; text-align: center; color: #999;">
+                        <p style="font-size: 16px; margin-bottom: 10px;">😔 加载失败</p>
+                        <p style="font-size: 14px;">${error.message}</p>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 30px; background: var(--primary); color: white; border: none; border-radius: 4px; font-size: 14px;">重新加载</button>
+                    </div>
+                `;
+            }
         }
 
         // --- 首页渲染 ---
         function renderHome() {
-            let html = '';
-            let firstBanner = true;
-            
-            homeData.forEach(row => {
-                if(row.type === 1) {
-                    html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
-                    // 第一张图片后面添加公告
-                    if(firstBanner) {
-                        html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到汇友机电有限公司</marquee></div>`;
-                        firstBanner = false;
-                    }
+            try {
+                console.log('开始渲染首页...');
+                let html = '';
+                let firstBanner = true;
+                
+                if (!homeData || !Array.isArray(homeData)) {
+                    throw new Error('首页配置数据格式错误');
                 }
-            });
-            
-            html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid" id="homeProductGrid">`;
-            db.products.slice(0, 10).forEach(item => {
-                html += `<div class="prod-card" data-id="${item.id}">
-                    <img data-src="${fixUrl(item.img)}" src="placeholder.svg" alt="${item.name}">
-                    <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
-                    <div class="prod-price">${formatPrice(item.price, item.unit)}</div>
-                </div>`;
-            });
-            html += `</div>`;
-            
-            const homeContent = document.getElementById('homeContent');
-            homeContent.innerHTML = html;
-            
-            // 启动懒加载
-            observeLazyImages(homeContent);
+                
+                homeData.forEach(row => {
+                    if(row.type === 1 && row.data && row.data.length > 0) {
+                        html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
+                        // 第一张图片后面添加公告
+                        if(firstBanner) {
+                            html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到汇友机电有限公司</marquee></div>`;
+                            firstBanner = false;
+                        }
+                    }
+                });
+                
+                if (!db || !db.products || !Array.isArray(db.products)) {
+                    throw new Error('商品数据格式错误');
+                }
+                
+                html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid" id="homeProductGrid">`;
+                db.products.slice(0, 10).forEach(item => {
+                    html += `<div class="prod-card" data-id="${item.id}">
+                        <img data-src="${fixUrl(item.img)}" src="placeholder.svg" alt="${item.name}">
+                        <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
+                        <div class="prod-price">${formatPrice(item.price, item.unit)}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+                
+                const homeContent = document.getElementById('homeContent');
+                if (!homeContent) {
+                    throw new Error('找不到首页容器元素');
+                }
+                homeContent.innerHTML = html;
+                
+                // 启动懒加载
+                observeLazyImages(homeContent);
+                console.log('首页渲染完成');
+            } catch (error) {
+                console.error('首页渲染失败:', error);
+                const homeContent = document.getElementById('homeContent');
+                if (homeContent) {
+                    homeContent.innerHTML = `
+                        <div style="padding: 40px 20px; text-align: center; color: #999;">
+                            <p style="font-size: 16px; margin-bottom: 10px;">😔 页面加载失败</p>
+                            <p style="font-size: 14px;">${error.message}</p>
+                        </div>
+                    `;
+                }
+            }
         }
 
         // --- 分类渲染 (图一逻辑) ---
