@@ -11,12 +11,21 @@
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: #333; font-size: 14px; }
 
         /* --- 顶部复刻 (根据图一) --- */
-        .top-nav { position: fixed; top: 0; width: 100%; height: 50px; background: white; z-index: 1000; display: flex; align-items: center; padding: 0 12px; gap: 10px; border-bottom: 1px solid var(--border); }
-        .logo-circle { width: 32px; height: 32px; background: var(--orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .logo-circle::after { content: "∨"; color: white; font-weight: bold; font-size: 14px; }
-        .search-wrap { flex: 1; background: #F2F3F5; height: 34px; border-radius: 17px; display: flex; align-items: center; padding: 0 15px; }
-        .search-wrap input { background: none; border: none; width: 100%; font-size: 13px; color: #333; outline: none; }
-        .scan-btn { width: 24px; height: 24px; opacity: 0.7; flex-shrink: 0; }
+        .top-nav { position: fixed; top: 0; width: 100%; height: 50px; background: white; z-index: 1000; display: none; align-items: center; padding: 0 12px; gap: 10px; border-bottom: 1px solid var(--border); }
+        .top-nav.show { display: flex; }
+        
+        /* 首页顶部 */
+        .home-header { justify-content: space-between; }
+        .home-header .logo { height: 34px; }
+        .home-header .right-icons { display: flex; gap: 15px; align-items: center; }
+        .home-header .right-icons img { width: 24px; height: 24px; }
+        
+        /* 分类页顶部 */
+        .category-header .logo-circle { width: 32px; height: 32px; flex-shrink: 0; }
+        .category-header .logo-circle img { width: 100%; height: 100%; object-fit: contain; }
+        .category-header .search-wrap { flex: 1; background: #F2F3F5; height: 34px; border-radius: 17px; display: flex; align-items: center; padding: 0 15px; }
+        .category-header .search-wrap input { background: none; border: none; width: 100%; font-size: 13px; color: #333; outline: none; }
+        .category-header .scan-btn { width: 24px; height: 24px; opacity: 0.7; flex-shrink: 0; }
 
         /* --- 页面切换 --- */
         .page { display: none; padding-top: 50px; padding-bottom: 60px; min-height: 100vh; }
