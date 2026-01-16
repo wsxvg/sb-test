@@ -318,6 +318,7 @@
         let currentSortType = 'default'; // default, price_asc, price_desc, hot, brand
         let selectedBrand = null; // 当前选中的品牌
         let availableBrands = []; // 当前分类下可用的品牌列表
+        let currentProducts = []; // 缓存当前显示的商品列表（搜索或分类结果）
         
         function openProductList(gid, name) {
             console.log('打开商品列表，分类ID:', gid, '名称:', name);
@@ -330,6 +331,9 @@
             // 使用 gids 数组过滤商品
             const filteredProducts = db.products.filter(p => p.gids && p.gids.includes(gid));
             console.log('找到商品数量:', filteredProducts.length);
+            
+            // 缓存当前商品列表
+            currentProducts = filteredProducts;
             
             // 提取当前分类下所有品牌
             const brandSet = new Set();
@@ -345,43 +349,45 @@
         }
         
         function renderProductList(products) {
-            const html = products.map(p => `
-                <div class="prod-list-item" onclick="openDetail(${p.id})">
-                    <img src="${fixUrl(p.img)}" class="prod-list-img" onerror="this.src='placeholder.svg'">
-                    <div class="prod-list-info">
-                        <div class="prod-list-name">${p.name}</div>
-                        <div class="prod-list-detail">
-                            <div>编码：${p.num || '无'}</div>
-                            <div>包装：${p.sale_info || '无'}</div>
-                            <div>${p.min_qty || ''}</div>
-                        </div>
-                        <div class="prod-list-price">¥${p.price}</div>
-                    </div>
-                    <div class="prod-list-add">+</div>
-                </div>
-            `).join('');
+            const container = document.getElementById('productListContent');
             
-            document.getElementById('productListContent').innerHTML = html || '<div style="padding:20px; text-align:center; color:#999;">暂无商品</div>';
+            if (!products || products.length === 0) {
+                container.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">暂无商品</div>';
+                return;
+            }
+            
+            // 使用 DocumentFragment 提高性能
+            const fragment = document.createDocumentFragment();
+            const tempDiv = document.createElement('div');
+            
+            products.forEach(p => {
+                tempDiv.innerHTML = `
+                    <div class="prod-list-item" onclick="openDetail(${p.id})">
+                        <img src="${fixUrl(p.img)}" class="prod-list-img" onerror="this.src='placeholder.svg'">
+                        <div class="prod-list-info">
+                            <div class="prod-list-name">${p.name}</div>
+                            <div class="prod-list-detail">
+                                <div>编码：${p.num || '无'}</div>
+                                <div>包装：${p.sale_info || '无'}</div>
+                                <div>${p.min_qty || ''}</div>
+                            </div>
+                            <div class="prod-list-price">¥${p.price}</div>
+                        </div>
+                        <div class="prod-list-add">+</div>
+                    </div>
+                `;
+                fragment.appendChild(tempDiv.firstElementChild);
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(fragment);
         }
         
         function sortProducts(type) {
-            if (!currentCategoryId) return;
+            if (!currentProducts || currentProducts.length === 0) return;
             
-            let products;
-            
-            // 如果是搜索模式，需要重新搜索
-            if (currentCategoryId === 'search') {
-                const searchInput = document.querySelector('.product-list-search input');
-                const kw = searchInput ? searchInput.value.trim().toLowerCase() : '';
-                products = db.products.filter(p => 
-                    p.name.toLowerCase().includes(kw) || 
-                    (p.num && p.num.toLowerCase().includes(kw)) ||
-                    (p.brand && p.brand.toLowerCase().includes(kw))
-                );
-            } else {
-                // 正常分类模式
-                products = db.products.filter(p => p.gids && p.gids.includes(currentCategoryId));
-            }
+            // 从缓存的商品列表开始
+            let products = [...currentProducts];
             
             // 如果有选中的品牌，先按品牌过滤
             if (selectedBrand) {
@@ -561,10 +567,13 @@
                 );
                 
                 // 使用商品列表页展示搜索结果
-                currentCategoryId = 'search'; // 特殊标记
+                currentCategoryId = 'search';
                 currentCategoryName = `搜索"${kw}"`;
                 currentSortType = 'default';
                 selectedBrand = null;
+                
+                // 缓存搜索结果
+                currentProducts = results;
                 
                 // 提取搜索结果中的品牌
                 const brandSet = new Set();
@@ -597,6 +606,9 @@
                 currentSortType = 'default';
                 selectedBrand = null;
                 
+                // 缓存搜索结果
+                currentProducts = results;
+                
                 // 提取搜索结果中的品牌
                 const brandSet = new Set();
                 results.forEach(p => {
@@ -605,6 +617,9 @@
                     }
                 });
                 availableBrands = Array.from(brandSet).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+                
+                // 重置排序按钮
+                updateSortButtons();
                 
                 renderProductList(results);
             }
