@@ -127,13 +127,8 @@ jobs:
         with:
           script: |
             const title = '⚠️ 商品数据更新失败';
-            const body = `## 自动更新失败
-            
-            **时间**: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
-            **工作流**: ${context.workflow}
-            **运行ID**: ${context.runId}
-            
-            请检查 [工作流日志](${context.payload.repository.html_url}/actions/runs/${context.runId}) 查看详细错误信息。`;
+            const time = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
+            const body = `## 自动更新失败\n\n**时间**: ${time}\n**工作流**: ${context.workflow}\n**运行ID**: ${context.runId}\n\n请检查 [工作流日志](${context.payload.repository.html_url}/actions/runs/${context.runId}) 查看详细错误信息。`;
             
             github.rest.issues.create({
               owner: context.repo.owner,
