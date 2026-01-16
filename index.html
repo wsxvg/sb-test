@@ -241,6 +241,12 @@
             return Math.ceil(price * 1.3);
         }
         
+        // 格式化价格显示（包含单位）
+        function formatPrice(price, unit) {
+            const finalPrice = calculatePrice(price);
+            return unit ? `¥${finalPrice}/${unit}` : `¥${finalPrice}`;
+        }
+        
         // 防抖函数
         function debounce(func, wait) {
             let timeout;
@@ -332,7 +338,7 @@
                 html += `<div class="prod-card" data-id="${item.id}">
                     <img data-src="${fixUrl(item.img)}" src="placeholder.svg" alt="${item.name}">
                     <div style="font-size:12px; margin:5px 0; height:34px; overflow:hidden;">${item.name}</div>
-                    <div class="prod-price">¥${calculatePrice(item.price)}</div>
+                    <div class="prod-price">${formatPrice(item.price, item.unit)}</div>
                 </div>`;
             });
             html += `</div>`;
@@ -457,7 +463,7 @@
                                 <div>包装：${p.sale_info || '无'}</div>
                                 <div>${p.min_qty || ''}</div>
                             </div>
-                            <div class="prod-list-price">¥${calculatePrice(p.price)}</div>
+                            <div class="prod-list-price">${formatPrice(p.price, p.unit)}</div>
                         </div>
                         <div class="prod-list-add">+</div>
                     </div>
@@ -588,7 +594,7 @@
             if(!p) return;
             document.getElementById('detImg').src = fixUrl(p.img);
             document.getElementById('detName').textContent = p.name;
-            document.getElementById('detPrice').textContent = "¥" + calculatePrice(p.price);
+            document.getElementById('detPrice').textContent = formatPrice(p.price, p.unit);
             document.getElementById('detNum').textContent = p.num || '无';
             document.getElementById('detSale').textContent = p.sale_info || '无';
             document.getElementById('detMin').textContent = p.min_qty || '无';
