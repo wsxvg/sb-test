@@ -1,43 +1,5 @@
 [
   {
-    "row_index": 0,
-    "type": 1,
-    "title": "",
-    "data": [
-      {
-        "local": "images/home/20221017111243_8922.jpg",
-        "original": "https://kaifa.sintoyu.cn/UploadFiles/4433/pageimages/20221017111243_8922.jpg",
-        "title": ""
-      },
-      {
-        "local": "images/home/20220818112631_1844.jpg",
-        "original": "https://kaifa.sintoyu.cn/UploadFiles/4433/pageimages/20220818112631_1844.jpg",
-        "title": ""
-      },
-      {
-        "local": "images/home/20220819163341_5418.png",
-        "original": "https://kaifa.sintoyu.cn/UploadFiles/4433/pageimages/20220819163341_5418.png",
-        "title": ""
-      },
-      {
-        "local": "images/home/20220819163534_0770.jpg",
-        "original": "https://kaifa.sintoyu.cn/UploadFiles/4433/pageimages/20220819163534_0770.jpg",
-        "title": ""
-      },
-      {
-        "local": "images/home/20220819163816_3690.jpg",
-        "original": "https://kaifa.sintoyu.cn/UploadFiles/4433/pageimages/20220819163816_3690.jpg",
-        "title": ""
-      },
-      {
-        "local": "images/home/20220819163542_0955.jpg",
-        "original": "https://kaifa.sintoyu.cn/UploadFiles/4433/pageimages/20220819163542_0955.jpg",
-        "title": ""
-      }
-    ],
-    "raw_notice": ""
-  },
-  {
     "row_index": 1,
     "type": 2,
     "title": "",
