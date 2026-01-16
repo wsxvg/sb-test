@@ -15,8 +15,8 @@
             position: fixed; top: 0; width: 100%; height: 55px; background: white; 
             z-index: 1000; display: flex; align-items: center; padding: 0 10px; gap: 10px;
         }
-        .orange-logo { width: 32px; height: 32px; background: #FF7033; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .orange-logo::after { content: "∨"; color: white; font-weight: bold; font-size: 14px; }
+        .orange-logo { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .orange-logo img { width: 100%; height: 100%; object-fit: contain; }
         
         .search-container { flex: 1; background: #EFEFEF; height: 36px; border-radius: 18px; display: flex; align-items: center; padding: 0 15px; color: #888; font-size: 14px; }
         .search-container i { margin-right: 8px; font-style: normal; }
@@ -68,7 +68,9 @@
 
     <!-- 顶部复刻 -->
     <div class="top-nav-bar" id="globalHeader">
-        <div class="orange-logo"></div>
+        <div class="orange-logo">
+            <img src="images/circle-class-down.png" alt="分类">
+        </div>
         <div class="search-container">
             <i>🔍</i> 搜索产品
         </div>
