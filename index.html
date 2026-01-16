@@ -290,8 +290,11 @@
                 </div>
             `).join('');
             const container = document.getElementById('subProdList');
+            console.log('容器存在:', !!container, '内容长度:', html.length);
             if(container) {
                 container.innerHTML = html || '<div style="padding:20px; text-align:center; color:#999;">暂无商品</div>';
+                // 滚动到商品列表位置
+                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
 
