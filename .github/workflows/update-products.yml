@@ -52,17 +52,14 @@ jobs:
             exit 1
           fi
           
-          # 检查文件大小（至少应该有 100KB）- Linux 使用 -c%s
           FILE_SIZE=$(stat -c%s "products_db.json")
           if [ "$FILE_SIZE" -lt 102400 ]; then
             echo "错误：products_db.json 文件太小 ($FILE_SIZE bytes)"
             exit 1
           fi
           
-          # 检查 JSON 格式是否正确
           python -c "import json; json.load(open('products_db.json'))"
           
-          # 检查商品数量
           PRODUCT_COUNT=$(python -c "import json; data=json.load(open('products_db.json')); print(len(data.get('products', [])))")
           echo "商品数量: $PRODUCT_COUNT"
           
@@ -84,7 +81,6 @@ jobs:
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
             
-            # 统计变化信息
             OLD_COUNT=$(git show HEAD:static-shop-test/products_db.json | python -c "import json,sys; data=json.load(sys.stdin); print(len(data.get('products', [])))" 2>/dev/null || echo "0")
             NEW_COUNT=$(python -c "import json; data=json.load(open('products_db.json')); print(len(data.get('products', [])))")
             DIFF=$((NEW_COUNT - OLD_COUNT))
@@ -93,21 +89,19 @@ jobs:
             echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
             echo "diff=$DIFF" >> $GITHUB_OUTPUT
             
-            echo "📊 商品数量变化: $OLD_COUNT → $NEW_COUNT (${DIFF:+$DIFF})"
+            echo "📊 商品数量变化: $OLD_COUNT → $NEW_COUNT"
           fi
       
       # 7. 提交并推送更改
-      - name: 提交更改
+      - name: 提交并推送更改
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           cd static-shop-test
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           
-          # 获取当前时间（北京时间）
           BEIJING_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
           
-          # 构建提交信息
           OLD_COUNT="${{ steps.check_changes.outputs.old_count }}"
           NEW_COUNT="${{ steps.check_changes.outputs.new_count }}"
           DIFF="${{ steps.check_changes.outputs.diff }}"
@@ -124,33 +118,22 @@ jobs:
           
           git add products_db.json
           git commit -m "$COMMIT_MSG"
-      
-      # 8. 推送到仓库
-      - name: 推送更改
-        if: steps.check_changes.outputs.has_changes == 'true'
-        run: |
-          cd static-shop-test
           git push
       
-      # 9. 创建 Issue 报告（如果失败）
+      # 8. 创建失败报告
       - name: 创建失败报告
         if: failure()
         uses: actions/github-script@v7
         with:
           script: |
             const title = '⚠️ 商品数据更新失败';
-            const body = `
-            ## 自动更新失败
+            const body = `## 自动更新失败
             
             **时间**: ${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}
             **工作流**: ${context.workflow}
             **运行ID**: ${context.runId}
             
-            请检查 [工作流日志](${context.payload.repository.html_url}/actions/runs/${context.runId}) 查看详细错误信息。
-            
-            ---
-            *此 Issue 由 GitHub Actions 自动创建*
-            `;
+            请检查 [工作流日志](${context.payload.repository.html_url}/actions/runs/${context.runId}) 查看详细错误信息。`;
             
             github.rest.issues.create({
               owner: context.repo.owner,
