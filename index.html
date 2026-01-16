@@ -179,7 +179,7 @@
             <span class="product-list-back" onclick="closeProductList()">←</span>
             <div class="product-list-search">
                 <span style="color:#999; margin-right:8px;">🔍</span>
-                <input type="text" placeholder="输入品名/条码/拼音码">
+                <input type="text" placeholder="输入品名/条码/拼音码" onkeypress="handleProductListSearch(event)">
             </div>
         </div>
         <div class="product-list-sort">
@@ -367,8 +367,21 @@
         function sortProducts(type) {
             if (!currentCategoryId) return;
             
-            // 重新获取当前分类的商品
-            let products = db.products.filter(p => p.gids && p.gids.includes(currentCategoryId));
+            let products;
+            
+            // 如果是搜索模式，需要重新搜索
+            if (currentCategoryId === 'search') {
+                const searchInput = document.querySelector('.product-list-search input');
+                const kw = searchInput ? searchInput.value.trim().toLowerCase() : '';
+                products = db.products.filter(p => 
+                    p.name.toLowerCase().includes(kw) || 
+                    (p.num && p.num.toLowerCase().includes(kw)) ||
+                    (p.brand && p.brand.toLowerCase().includes(kw))
+                );
+            } else {
+                // 正常分类模式
+                products = db.products.filter(p => p.gids && p.gids.includes(currentCategoryId));
+            }
             
             // 如果有选中的品牌，先按品牌过滤
             if (selectedBrand) {
@@ -538,15 +551,62 @@
 
         function handleSearch(e) {
             if(e.key === 'Enter') {
-                const kw = e.target.value.toLowerCase();
-                const res = db.products.filter(p => p.name.toLowerCase().includes(kw) || (p.num && p.num.includes(kw)));
-                switchTab('category', document.querySelectorAll('.tab-btn')[1]);
-                document.getElementById('catDynamicContent').innerHTML = `<div class="sub-title">搜索结果: ${res.length}</div><div class="prod-grid">${res.map(p => `
-                    <div class="prod-card" onclick="openDetail(${p.id})">
-                        <img src="${fixUrl(p.img)}">
-                        <div style="font-size:11px; margin:5px 0;">${p.name}</div>
-                        <div style="color:#ff5000; font-weight:bold;">¥${p.price}</div>
-                    </div>`).join('')}</div>`;
+                const kw = e.target.value.trim().toLowerCase();
+                if (!kw) return;
+                
+                const results = db.products.filter(p => 
+                    p.name.toLowerCase().includes(kw) || 
+                    (p.num && p.num.toLowerCase().includes(kw)) ||
+                    (p.brand && p.brand.toLowerCase().includes(kw))
+                );
+                
+                // 使用商品列表页展示搜索结果
+                currentCategoryId = 'search'; // 特殊标记
+                currentCategoryName = `搜索"${kw}"`;
+                currentSortType = 'default';
+                selectedBrand = null;
+                
+                // 提取搜索结果中的品牌
+                const brandSet = new Set();
+                results.forEach(p => {
+                    if (p.brand && p.brand.trim()) {
+                        brandSet.add(p.brand.trim());
+                    }
+                });
+                availableBrands = Array.from(brandSet).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+                
+                renderProductList(results);
+                document.getElementById('productListPage').classList.add('active');
+            }
+        }
+        
+        function handleProductListSearch(e) {
+            if(e.key === 'Enter') {
+                const kw = e.target.value.trim().toLowerCase();
+                if (!kw) return;
+                
+                const results = db.products.filter(p => 
+                    p.name.toLowerCase().includes(kw) || 
+                    (p.num && p.num.toLowerCase().includes(kw)) ||
+                    (p.brand && p.brand.toLowerCase().includes(kw))
+                );
+                
+                // 更新搜索状态
+                currentCategoryId = 'search';
+                currentCategoryName = `搜索"${kw}"`;
+                currentSortType = 'default';
+                selectedBrand = null;
+                
+                // 提取搜索结果中的品牌
+                const brandSet = new Set();
+                results.forEach(p => {
+                    if (p.brand && p.brand.trim()) {
+                        brandSet.add(p.brand.trim());
+                    }
+                });
+                availableBrands = Array.from(brandSet).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+                
+                renderProductList(results);
             }
         }
 
