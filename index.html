@@ -172,18 +172,19 @@
         // --- 首页渲染 ---
         function renderHome() {
             let html = '';
-            // 先添加固定公告
-            html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到世标工品汇</marquee></div>`;
+            let firstBanner = true;
             
-            let hasNotice = false;
             homeData.forEach(row => {
-                if(row.type === 1) html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
-                // 跳过其他公告，只保留第一个
-                if(row.type === 2 && !hasNotice) {
-                    hasNotice = true;
-                    return; // 已经在上面添加了固定公告，跳过
+                if(row.type === 1) {
+                    html += `<div class="home-row row-banner"><img src="${row.data[0].local}"></div>`;
+                    // 第一张图片后面添加公告
+                    if(firstBanner) {
+                        html += `<div class="home-row row-notice"><span class="notice-tag">店铺公告</span><marquee>欢迎来到世标工品汇</marquee></div>`;
+                        firstBanner = false;
+                    }
                 }
             });
+            
             html += `<div style="padding:10px; font-weight:bold;">为您推荐</div><div class="prod-grid">`;
             db.products.slice(0, 10).forEach(item => {
                 html += `<div class="prod-card" onclick="openDetail(${item.id})">
