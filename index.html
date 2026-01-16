@@ -15,17 +15,19 @@
         .top-nav.show { display: flex; }
         
         /* 首页顶部 */
-        .home-header { justify-content: space-between; }
-        .home-header .logo { height: 34px; }
-        .home-header .right-icons { display: flex; gap: 15px; align-items: center; }
-        .home-header .right-icons img { width: 24px; height: 24px; }
+        .top-nav.home-mode { justify-content: space-between; }
+        .top-nav.home-mode .logo { height: 34px; }
+        .top-nav.home-mode .right-icons { display: flex; gap: 15px; align-items: center; }
+        .top-nav.home-mode .right-icons img { width: 24px; height: 24px; }
         
         /* 分类页顶部 */
-        .category-header .logo-circle { width: 32px; height: 32px; flex-shrink: 0; }
-        .category-header .logo-circle img { width: 100%; height: 100%; object-fit: contain; }
-        .category-header .search-wrap { flex: 1; background: #F2F3F5; height: 34px; border-radius: 17px; display: flex; align-items: center; padding: 0 15px; }
-        .category-header .search-wrap input { background: none; border: none; width: 100%; font-size: 13px; color: #333; outline: none; }
-        .category-header .scan-btn { width: 24px; height: 24px; opacity: 0.7; flex-shrink: 0; }
+        .top-nav.category-mode .logo-circle { width: 32px; height: 32px; flex-shrink: 0; }
+        .top-nav.category-mode .logo-circle img { width: 100%; height: 100%; object-fit: contain; }
+        .top-nav.category-mode .search-wrap { flex: 1; background: #F2F3F5; height: 34px; border-radius: 17px; display: flex; align-items: center; padding: 0 15px; gap: 8px; }
+        .top-nav.category-mode .search-wrap::before { content: '🔍'; color: #999; font-size: 16px; }
+        .top-nav.category-mode .search-wrap input { background: none; border: none; width: 100%; font-size: 13px; color: #333; outline: none; }
+        .top-nav.category-mode .search-wrap input::placeholder { color: #999; }
+        .top-nav.category-mode .scan-btn { width: 24px; height: 24px; opacity: 0.7; flex-shrink: 0; }
 
         /* --- 页面切换 --- */
         .page { display: none; padding-top: 50px; padding-bottom: 60px; min-height: 100vh; }
@@ -74,12 +76,14 @@
 <body>
 
     <!-- 顶部导航 -->
-    <div class="top-nav" id="topNav">
-        <div class="logo-circle"></div>
-        <div class="search-wrap">
-            <input type="text" id="searchInput" placeholder="搜索产品..." onkeypress="handleSearch(event)">
+    <div class="top-nav show home-mode" id="topNav">
+        <!-- 首页模式内容 -->
+        <img src="images/logo.png" class="logo" alt="Logo">
+        <div class="right-icons">
+            <img src="images/home-notice-null.png" alt="通知">
+            <img src="images/home-scan.png" alt="扫一扫">
+            <img src="images/home-search.png" alt="搜索">
         </div>
-        <img src="images/home-scan.png" class="scan-btn" onclick="alert('模拟扫码')">
     </div>
 
     <!-- 1. 首页 -->
@@ -245,7 +249,38 @@
             document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
             document.getElementById(type + 'Page').classList.add('active');
             el.classList.add('active');
-            document.getElementById('topNav').style.display = (type === 'me') ? 'none' : 'flex';
+            
+            const topNav = document.getElementById('topNav');
+            if (type === 'me') {
+                topNav.style.display = 'none';
+            } else if (type === 'home') {
+                // 首页模式
+                topNav.style.display = 'flex';
+                topNav.className = 'top-nav show home-mode';
+                topNav.innerHTML = `
+                    <img src="images/logo.png" class="logo" alt="Logo">
+                    <div class="right-icons">
+                        <img src="images/home-notice-null.png" alt="通知">
+                        <img src="images/home-scan.png" alt="扫一扫">
+                        <img src="images/home-search.png" alt="搜索">
+                    </div>
+                `;
+            } else if (type === 'category') {
+                // 分类页模式
+                topNav.style.display = 'flex';
+                topNav.className = 'top-nav show category-mode';
+                topNav.innerHTML = `
+                    <div class="logo-circle">
+                        <img src="images/circle-class-down.png" alt="分类">
+                    </div>
+                    <div class="search-wrap">
+                        <input type="text" id="searchInput" placeholder="搜索商品编码或名称" onkeypress="handleSearch(event)">
+                    </div>
+                    <img src="images/home-scan.png" class="scan-btn" alt="扫码">
+                `;
+            } else {
+                topNav.style.display = 'flex';
+            }
         }
 
         function fixUrl(u) {
