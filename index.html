@@ -79,6 +79,18 @@
         .prod-list-price { color: #ff5000; font-size: 16px; font-weight: bold; margin-top: 5px; }
         .prod-list-add { width: 36px; height: 36px; background: #ff5000; border-radius: 50%; color: white; font-size: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
+        /* --- 商品列表页（独立页面） --- */
+        .product-list-page { display: none; position: fixed; inset: 0; background: white; z-index: 2500; flex-direction: column; }
+        .product-list-page.active { display: flex; }
+        .product-list-header { height: 50px; background: white; border-bottom: 1px solid #eee; display: flex; align-items: center; padding: 0 15px; gap: 10px; flex-shrink: 0; }
+        .product-list-back { font-size: 24px; color: #333; cursor: pointer; }
+        .product-list-search { flex: 1; background: #F2F3F5; height: 34px; border-radius: 17px; display: flex; align-items: center; padding: 0 15px; }
+        .product-list-search input { background: none; border: none; width: 100%; font-size: 13px; outline: none; }
+        .product-list-sort { height: 44px; background: white; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; padding: 0 15px; gap: 30px; flex-shrink: 0; }
+        .sort-item { font-size: 14px; color: #666; cursor: pointer; }
+        .sort-item.active { color: #FF7033; font-weight: bold; }
+        .product-list-content { flex: 1; overflow-y: auto; background: #f5f5f5; }
+
         .empty-cart { text-align: center; padding-top: 100px; color: #999; }
     </style>
 </head>
@@ -146,6 +158,24 @@
                 <p>起订：<span id="detMin"></span></p>
             </div>
         </div>
+    </div>
+
+    <!-- 商品列表页（独立页面） -->
+    <div id="productListPage" class="product-list-page">
+        <div class="product-list-header">
+            <span class="product-list-back" onclick="closeProductList()">←</span>
+            <div class="product-list-search">
+                <span style="color:#999; margin-right:8px;">🔍</span>
+                <input type="text" placeholder="输入品名/条码/拼音码">
+            </div>
+        </div>
+        <div class="product-list-sort">
+            <div class="sort-item active">综合</div>
+            <div class="sort-item">价格 ▲</div>
+            <div class="sort-item">热度</div>
+            <div class="sort-item">品牌</div>
+        </div>
+        <div class="product-list-content" id="productListContent"></div>
     </div>
 
     <!-- 底部 TabBar -->
@@ -265,14 +295,11 @@
         }
 
         function showCategoryList(gid, limit=false) {
-            console.log('查找分类ID:', gid);
+            console.log('打开商品列表，分类ID:', gid);
             
-            // 由于商品的 gid 都是 null，我们暂时显示所有商品
-            // TODO: 需要重新抓取数据，给商品添加正确的分类ID
+            // 打开独立的商品列表页面
             const allProducts = db.products;
-            const target = limit ? allProducts.slice(0, 20) : allProducts.slice(0, 100);
-            
-            console.log('显示商品数量:', target.length);
+            const target = allProducts.slice(0, 100);
             
             const html = target.map(p => `
                 <div class="prod-list-item" onclick="openDetail(${p.id})">
@@ -289,13 +316,13 @@
                     <div class="prod-list-add">+</div>
                 </div>
             `).join('');
-            const container = document.getElementById('subProdList');
-            console.log('容器存在:', !!container, '内容长度:', html.length);
-            if(container) {
-                container.innerHTML = html || '<div style="padding:20px; text-align:center; color:#999;">暂无商品</div>';
-                // 滚动到商品列表位置
-                container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            
+            document.getElementById('productListContent').innerHTML = html;
+            document.getElementById('productListPage').classList.add('active');
+        }
+        
+        function closeProductList() {
+            document.getElementById('productListPage').classList.remove('active');
         }
 
         // --- 找回的功能：详情页 ---
