@@ -150,17 +150,16 @@
         function renderHomePage() {
             const container = document.getElementById('homeContent');
             let html = '';
-            
-            // 首先添加公告栏
-            html += `<div class="home-section row-type-2">
-                <span class="label">店铺公告</span>
-                <marquee>欢迎来到世标工品汇</marquee>
-            </div>`;
 
             homeConfig.forEach(row => {
                 if (row.type === 1) { // 大图/轮播
                     html += `<div class="home-section row-type-1">
                         <img src="${row.data[0].local}">
+                    </div>`;
+                } else if (row.type === 2) { // 公告
+                    html += `<div class="home-section row-type-2">
+                        <span class="label">店铺公告</span>
+                        <marquee>欢迎来到世标工品汇</marquee>
                     </div>`;
                 } else if (row.type === 6 || row.type === 7 || row.type === 13) { // 品牌/分类图标网格
                     html += `<div class="home-section row-type-brand">`;
